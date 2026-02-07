@@ -1,0 +1,249 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Red and White Brand Color Palette - OKLCH Format (Deeds with arrowhead-d) */
+    /* Primary: Vibrant Red */
+    --primary: oklch(0.55 0.22 25);
+    --primary-foreground: oklch(0.98 0.01 0);
+
+    /* Secondary: Deep Red */
+    --secondary: oklch(0.40 0.18 25);
+    --secondary-foreground: oklch(0.98 0.01 0);
+
+    /* Accent: Bright Red */
+    --accent: oklch(0.65 0.24 25);
+    --accent-foreground: oklch(0.98 0.01 0);
+
+    /* Red Accent for Futuristic Effects */
+    --red-accent: oklch(0.60 0.22 25);
+    --red-glow: oklch(0.65 0.24 25);
+
+    /* Bright Red for Digital Effects */
+    --red-bright: oklch(0.70 0.26 25);
+
+    /* Muted tones */
+    --muted: oklch(0.92 0.01 0);
+    --muted-foreground: oklch(0.45 0.02 0);
+
+    /* Background and foreground - Clean White primary */
+    --background: oklch(1.0 0 0);
+    --foreground: oklch(0.15 0.02 0);
+
+    /* Lighter shade background - reduced saturation and increased lightness for softer tone */
+    --background-lighter: oklch(0.98 0.005 0);
+
+    /* Card styling - White */
+    --card: oklch(1.0 0 0);
+    --card-foreground: oklch(0.15 0.02 0);
+
+    /* Popover styling - White */
+    --popover: oklch(1.0 0 0);
+    --popover-foreground: oklch(0.15 0.02 0);
+
+    /* Border and input */
+    --border: oklch(0.88 0.01 0);
+    --input: oklch(0.88 0.01 0);
+
+    /* Ring for focus states - Red glow */
+    --ring: oklch(0.55 0.22 25);
+
+    /* Destructive (error states) */
+    --destructive: oklch(0.58 0.24 25);
+    --destructive-foreground: oklch(0.98 0.01 0);
+
+    /* Success states */
+    --success: oklch(0.60 0.15 145);
+    --success-foreground: oklch(0.98 0.01 0);
+
+    /* Warning states */
+    --warning: oklch(0.70 0.18 75);
+    --warning-foreground: oklch(0.15 0.02 0);
+
+    /* Chart colors */
+    --chart-1: oklch(0.55 0.22 25);
+    --chart-2: oklch(0.65 0.24 25);
+    --chart-3: oklch(0.40 0.18 25);
+    --chart-4: oklch(0.70 0.26 25);
+    --chart-5: oklch(0.50 0.20 25);
+
+    /* Radius */
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Dark mode: Red accents on dark backgrounds */
+    --primary: oklch(0.65 0.24 25);
+    --primary-foreground: oklch(0.98 0.01 0);
+
+    --secondary: oklch(0.25 0.02 0);
+    --secondary-foreground: oklch(0.98 0.01 0);
+
+    --accent: oklch(0.30 0.03 0);
+    --accent-foreground: oklch(0.98 0.01 0);
+
+    --muted: oklch(0.25 0.02 0);
+    --muted-foreground: oklch(0.65 0.02 0);
+
+    --background: oklch(0.15 0.02 0);
+    --foreground: oklch(0.98 0.01 0);
+
+    --background-lighter: oklch(0.18 0.02 0);
+
+    --card: oklch(0.15 0.02 0);
+    --card-foreground: oklch(0.98 0.01 0);
+
+    --popover: oklch(0.15 0.02 0);
+    --popover-foreground: oklch(0.98 0.01 0);
+
+    --border: oklch(0.25 0.02 0);
+    --input: oklch(0.25 0.02 0);
+
+    --ring: oklch(0.65 0.24 25);
+
+    --destructive: oklch(0.58 0.24 25);
+    --destructive-foreground: oklch(0.98 0.01 0);
+
+    --success: oklch(0.60 0.15 145);
+    --success-foreground: oklch(0.98 0.01 0);
+
+    --warning: oklch(0.70 0.18 75);
+    --warning-foreground: oklch(0.15 0.02 0);
+
+    --chart-1: oklch(0.65 0.24 25);
+    --chart-2: oklch(0.55 0.22 25);
+    --chart-3: oklch(0.45 0.20 25);
+    --chart-4: oklch(0.75 0.26 25);
+    --chart-5: oklch(0.60 0.22 25);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Enhanced z-index management for login page */
+  .z-login-overlay {
+    z-index: 150;
+  }
+  .z-login-content {
+    z-index: 160;
+  }
+
+  /* Modal z-index utilities */
+  .z-modal-backdrop {
+    z-index: 199;
+  }
+  .z-modal-content {
+    z-index: 200;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Login modal blocking utilities */
+  .login-modal-blocking {
+    pointer-events: auto !important;
+    touch-action: auto !important;
+  }
+
+  .login-modal-dimmed-bg {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Enhanced button interaction feedback */
+  .button-active-feedback {
+    transition: all 0.15s ease;
+  }
+
+  .button-active-feedback:active {
+    transform: scale(0.97);
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    transition: all 0.2s ease;
+  }
+
+  /* Horizontal scroll container utilities */
+  .horizontal-scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+  }
+
+  .horizontal-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Video mode reel utilities */
+  .video-reel-container {
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .video-reel-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Overscroll behavior */
+  .overscroll-none {
+    overscroll-behavior: none;
+  }
+}
+
+/* Ensure dialogs and modals have white backgrounds and proper visibility */
+[role="dialog"],
+[role="alertdialog"] {
+  background-color: white !important;
+  color: oklch(0.15 0.02 0) !important;
+}
+
+.dark [role="dialog"],
+.dark [role="alertdialog"] {
+  background-color: oklch(0.15 0.02 0) !important;
+  color: oklch(0.98 0.01 0) !important;
+}
+
+/* Ensure proper image display without creating void areas */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent oversized clickable areas on logos */
+.logo-safe-hitbox {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  pointer-events: auto;
+}

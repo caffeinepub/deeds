@@ -1,0 +1,87 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-07T00:17:20.554Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 3,
+    "implemented": 3,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Restore missing icons across the UI by auditing all icon usage (lucide-react icons and /assets/generated image icons) and ensuring every icon renders correctly in all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and in global UI (Header/Footer). Add safe fallbacks so missing image assets do not render as blank space (e.g., show a minimal inline icon or text label when an icon URL fails to load).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SafeImageIcon.tsx",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/Gate.tsx",
+          "frontend/src/components/DiscoverFeed.tsx",
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/Messages.tsx",
+          "frontend/src/components/LiveFeed.tsx",
+          "frontend/src/components/BlogPage.tsx",
+          "frontend/src/components/Marketplace.tsx",
+          "frontend/src/components/AdminDashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SafeImageIcon.tsx",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/Gate.tsx",
+          "frontend/src/components/DiscoverFeed.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Add a single, scrollable “All-in-one” hub screen where users can access the app’s primary features in one place via vertical scrolling. The hub must include clearly labeled sections (with visible icons) that provide direct entry points to: Feed, Discover, Create Post, Messages, Profile, Live, Blog, and Marketplace. The hub should be reachable from the default entry route (/) and should reduce the need to switch between separate pages for common actions.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AllInOneHub.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/Header.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AllInOneHub.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/Header.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Improve video-mode transitions so entering and exiting full-screen video mode feels smooth and does not trigger state updates during render. Ensure the transition into VideoModeReel happens predictably when selecting the Videos filter, and exiting returns the user to the prior scroll context of the feed/discover list.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Feed.tsx",
+          "frontend/src/components/DiscoverFeed.tsx",
+          "frontend/src/components/VideoModeReel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Feed.tsx",
+          "frontend/src/components/DiscoverFeed.tsx",
+          "frontend/src/components/VideoModeReel.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AllInOneHub.tsx",
+    "frontend/src/components/DiscoverFeed.tsx",
+    "frontend/src/components/Feed.tsx",
+    "frontend/src/components/Gate.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/SafeImageIcon.tsx",
+    "frontend/src/components/VideoModeReel.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

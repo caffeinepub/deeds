@@ -1,0 +1,78 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-restore-missing-icons-across-the-ui-by-auditing-all-icon-usage-lucide-react-icons-and-assets-generated-image-icons-and-ensuring-every-icon-renders-correctly-in-all-main-screens-gate-feed-discover-profile-messages-live-blog-marketplace-admin-and-in-global-ui-header-footer-add-safe-fallbacks-so-missing-image-assets-do-not-render-as-blank-space-e-g-show-a-minimal-inline-icon-or-text-label-when-an-icon-url-fails-to-load",
+      "featureTitle": "Restore missing icons across the UI by auditing all icon usage (lucide-react icons and /assets/generated image icons) and ensuring every icon renders correctly in all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and in global UI (Header/Footer). Add safe fallbacks so missing image assets do not render as blank space (e.g., show a minimal inline icon or text label when an icon URL fails to load).",
+      "files": [
+        "frontend/src/components/DiscoverFeed.tsx",
+        "frontend/src/components/Gate.tsx",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/SafeImageIcon.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-single-scrollable-all-in-one-hub-screen-where-users-can-access-the-app-s-primary-features-in-one-place-via-vertical-scrolling-the-hub-must-include-clearly-labeled-sections-with-visible-icons-that-provide-direct-entry-points-to-feed-discover-create-post-messages-profile-live-blog-and-marketplace-the-hub-should-be-reachable-from-the-default-entry-route-and-should-reduce-the-need-to-switch-between-separate-pages-for-common-actions",
+      "featureTitle": "Add a single, scrollable “All-in-one” hub screen where users can access the app’s primary features in one place via vertical scrolling. The hub must include clearly labeled sections (with visible icons) that provide direct entry points to: Feed, Discover, Create Post, Messages, Profile, Live, Blog, and Marketplace. The hub should be reachable from the default entry route (/) and should reduce the need to switch between separate pages for common actions.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AllInOneHub.tsx",
+        "frontend/src/components/Header.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-improve-video-mode-transitions-so-entering-and-exiting-full-screen-video-mode-feels-smooth-and-does-not-trigger-state-updates-during-render-ensure-the-transition-into-videomodereel-happens-predictably-when-selecting-the-videos-filter-and-exiting-returns-the-user-to-the-prior-scroll-context-of-the-feed-discover-list",
+      "featureTitle": "Improve video-mode transitions so entering and exiting full-screen video mode feels smooth and does not trigger state updates during render. Ensure the transition into VideoModeReel happens predictably when selecting the Videos filter, and exiting returns the user to the prior scroll context of the feed/discover list.",
+      "files": [
+        "frontend/src/components/DiscoverFeed.tsx",
+        "frontend/src/components/Feed.tsx",
+        "frontend/src/components/VideoModeReel.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

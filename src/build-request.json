@@ -1,0 +1,88 @@
+{
+  "kind": "build_request",
+  "title": "Restore missing icons and create a single scrollable hub for core actions",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Restore missing icons across the UI by auditing all icon usage (lucide-react icons and /assets/generated image icons) and ensuring every icon renders correctly in all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and in global UI (Header/Footer). Add safe fallbacks so missing image assets do not render as blank space (e.g., show a minimal inline icon or text label when an icon URL fails to load).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-5"
+        ],
+        "quotes": [
+          "Yes and all the icons are gone make it to where I can do everything essybin one place scrolling",
+          "Easy"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On a fresh load, icons are visible in Header (logo and any action icons), Footer, and in each main page’s key action areas (buttons, tabs, cards, and section headers).",
+        "If any /assets/generated icon fails to load, the UI shows a non-blank fallback (no invisible buttons due to missing icons).",
+        "No console errors related to missing icon imports or invalid asset paths during normal navigation."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add a single, scrollable “All-in-one” hub screen where users can access the app’s primary features in one place via vertical scrolling. The hub must include clearly labeled sections (with visible icons) that provide direct entry points to: Feed, Discover, Create Post, Messages, Profile, Live, Blog, and Marketplace. The hub should be reachable from the default entry route (/) and should reduce the need to switch between separate pages for common actions.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "make it to where I can do everything essybin one place scrolling"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There is one main hub screen that presents the primary app actions/features as vertically stacked sections users can scroll through.",
+        "Each hub section provides an obvious, single-tap/click action that navigates to (or opens) the corresponding feature flow (Feed, Discover, Create Post, Messages, Profile, Live, Blog, Marketplace).",
+        "The hub is usable on mobile without requiring horizontal scrolling for primary navigation."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Improve video-mode transitions so entering and exiting full-screen video mode feels smooth and does not trigger state updates during render. Ensure the transition into VideoModeReel happens predictably when selecting the Videos filter, and exiting returns the user to the prior scroll context of the feed/discover list.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "want me to adjust how the video‑mode transitions in next?",
+          "Yes and all the icons are gone make it to where I can do everything essybin one place scrolling"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Entering video mode does not rely on calling setState during render; it is handled via effects/event handlers.",
+        "Selecting the Videos filter transitions into the full-screen reel reliably without flicker.",
+        "Exiting video mode returns to the previous screen state (filter selection preserved; user not forced back to a different route unexpectedly)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts(x) or frontend/src/hooks/useActor.ts (immutable paths).",
+    "Keep backend as a single Motoko actor; no new backend services.",
+    "Use English for all user-facing text added or changed."
+  ],
+  "nonGoals": [
+    "Implementing new backend data models or adding new persistence for navigation preferences.",
+    "Adding third-party authentication providers or external databases.",
+    "Building real-time features (WebSockets/push notifications) as part of the hub or messaging."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

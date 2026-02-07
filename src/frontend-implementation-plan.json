@@ -1,0 +1,125 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Restore icons with safe fallbacks and add a single scrollable All-in-one hub",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Audit and restore all icons (lucide-react + /assets/generated) across main screens and global UI, adding safe fallbacks for missing image assets.",
+      "acceptanceCriteria": [
+        "On a fresh load, icons are visible in Header (logo and any action icons), Footer, and in each main page’s key action areas (buttons, tabs, cards, and section headers).",
+        "If any /assets/generated icon fails to load, the UI shows a non-blank fallback (no invisible buttons due to missing icons).",
+        "No console errors related to missing icon imports or invalid asset paths during normal navigation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SafeImageIcon.tsx",
+          "operation": "create",
+          "description": "Create a small shared component that renders /assets/generated image icons with an onError fallback (render a minimal inline SVG, lucide-react icon, or a short text label) so missing assets never produce blank space."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Audit header icon usage (logo image + MessageSquare) and wrap the logo in the SafeImageIcon behavior (or equivalent) so failures show a non-blank fallback; verify icon asset path(s) remain valid."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Audit lucide-react Heart icon rendering and ensure consistent sizing/contrast so it remains visible across themes; confirm no invalid imports."
+        },
+        {
+          "path": "frontend/src/components/Gate.tsx",
+          "operation": "modify",
+          "description": "Audit all lucide-react and /assets/generated icons (e.g., blog icon) and switch image icons to SafeImageIcon (or equivalent) with a visible fallback so cards/CTAs never become icon-only blanks."
+        },
+        {
+          "path": "frontend/src/components/DiscoverFeed.tsx",
+          "operation": "modify",
+          "description": "Replace the discovery header image icon with SafeImageIcon (or equivalent) to ensure it always renders with a fallback; re-audit any other icon usage on the screen for missing asset paths."
+        },
+        {
+          "path": "frontend/src/components/Profile.tsx",
+          "operation": "modify",
+          "description": "Audit Profile icon usage (lucide-react icons in controls/sections) and ensure all icons render reliably; where any /assets-generated images are used, route them through SafeImageIcon to avoid invisible actions."
+        },
+        {
+          "path": "frontend/src/components/Messages.tsx",
+          "operation": "modify",
+          "description": "Audit Messages icon usage (Send/Users and any other icons) and ensure all icons render and remain visible in key action areas."
+        },
+        {
+          "path": "frontend/src/components/LiveFeed.tsx",
+          "operation": "modify",
+          "description": "Audit Live screen icon usage (including live/session CTAs) and ensure any /assets/generated icons use SafeImageIcon fallbacks so primary actions remain visible."
+        },
+        {
+          "path": "frontend/src/components/BlogPage.tsx",
+          "operation": "modify",
+          "description": "Audit Blog page icons and switch /assets/generated blog icons to SafeImageIcon (or equivalent) with fallback to avoid empty-state icon blanks."
+        },
+        {
+          "path": "frontend/src/components/Marketplace.tsx",
+          "operation": "modify",
+          "description": "Audit Marketplace icons (header icon + Needs/Offers tab icons) and replace /assets/generated <img> usages with SafeImageIcon (or equivalent) so missing assets do not create blank tabs/buttons."
+        },
+        {
+          "path": "frontend/src/components/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Audit Admin dashboard lucide-react icon imports/usage across tabs and badges to ensure all icons render without missing-import console errors."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Create a single, vertically scrollable All-in-one hub at (/) with icon-labeled sections that jump into core app features.",
+      "acceptanceCriteria": [
+        "There is one main hub screen that presents the primary app actions/features as vertically stacked sections users can scroll through.",
+        "Each hub section provides an obvious, single-tap/click action that navigates to (or opens) the corresponding feature flow (Feed, Discover, Create Post, Messages, Profile, Live, Blog, Marketplace).",
+        "The hub is usable on mobile without requiring horizontal scrolling for primary navigation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AllInOneHub.tsx",
+          "operation": "create",
+          "description": "Implement the All-in-one hub screen as a single vertically scrollable page with clearly labeled sections and visible icons; each section provides a direct navigation action to Feed, Discover, Create Post (open CreatePostModal), Messages, Profile, Live, Blog, and Marketplace. Use SafeImageIcon for any /assets/generated icons so hub actions never render blank."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the All-in-one hub into routing so the default entry route (/) renders the hub. Preserve access to the existing Gate screen by registering it under a non-default route (e.g., /gate) so it remains reachable as a main screen."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Ensure global navigation provides an obvious way to reach the hub (/) from other screens (e.g., clicking the logo routes to the hub), without introducing horizontal-scroll primary navigation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Make full-screen video-mode transitions smooth by removing setState during render and restoring prior scroll context when exiting VideoModeReel.",
+      "acceptanceCriteria": [
+        "Entering video mode does not rely on calling setState during render; it is handled via effects/event handlers.",
+        "Selecting the Videos filter transitions into the full-screen reel reliably without flicker.",
+        "Exiting video mode returns to the previous screen state (filter selection preserved; user not forced back to a different route unexpectedly)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Feed.tsx",
+          "operation": "modify",
+          "description": "Refactor video-mode entry so it is triggered from an effect or explicit filter event handler (not during render). Capture the current scroll position before entering video mode and restore it after exiting so users return to the same feed scroll context with the filter selection preserved."
+        },
+        {
+          "path": "frontend/src/components/DiscoverFeed.tsx",
+          "operation": "modify",
+          "description": "Refactor video-mode entry so it is triggered from an effect or explicit filter event handler (not during render). Capture/restore the prior scroll position when entering/exiting VideoModeReel so users return to the previous discover list context with filter selection preserved."
+        },
+        {
+          "path": "frontend/src/components/VideoModeReel.tsx",
+          "operation": "modify",
+          "description": "Adjust VideoModeReel to support smooth entry/exit (e.g., optional initial scroll/index handling and predictable mounting behavior) so transitions do not flicker and exit returns control cleanly to the calling screen."
+        }
+      ]
+    }
+  ]
+}

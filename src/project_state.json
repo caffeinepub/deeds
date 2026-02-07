@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build an app with video-mode transitions, with a unified scrollable interface where all actions are accessible in one place, and ensure icons are present/restored.",
+  "architectural_notes": [],
+  "known_issues": [
+    "Icons are missing/gone in the current build."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-restore-missing-icons-across-the-ui-by-auditing-all-icon-usage-lucide-react-icons-and-assets-generated-image-icons-and-ensuring-every-icon-renders-correctly-in-all-main-screens-gate-feed-discover-profile-messages-live-blog-marketplace-admin-and-in-global-ui-header-footer-add-safe-fallbacks-so-missing-image-assets-do-not-render-as-blank-space-e-g-show-a-minimal-inline-icon-or-text-label-when-an-icon-url-fails-to-load",
+      "title": "Restore missing icons across the UI by auditing all icon usage (lucide-react icons and /assets/generated image icons) and ensuring every icon renders correctly in all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and in global UI (Header/Footer). Add safe fallbacks so missing image assets do not render as blank space (e.g., show a minimal inline icon or text label when an icon URL fails to load).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-single-scrollable-all-in-one-hub-screen-where-users-can-access-the-app-s-primary-features-in-one-place-via-vertical-scrolling-the-hub-must-include-clearly-labeled-sections-with-visible-icons-that-provide-direct-entry-points-to-feed-discover-create-post-messages-profile-live-blog-and-marketplace-the-hub-should-be-reachable-from-the-default-entry-route-and-should-reduce-the-need-to-switch-between-separate-pages-for-common-actions",
+      "title": "Add a single, scrollable “All-in-one” hub screen where users can access the app’s primary features in one place via vertical scrolling. The hub must include clearly labeled sections (with visible icons) that provide direct entry points to: Feed, Discover, Create Post, Messages, Profile, Live, Blog, and Marketplace. The hub should be reachable from the default entry route (/) and should reduce the need to switch between separate pages for common actions.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-video-mode-transitions-so-entering-and-exiting-full-screen-video-mode-feels-smooth-and-does-not-trigger-state-updates-during-render-ensure-the-transition-into-videomodereel-happens-predictably-when-selecting-the-videos-filter-and-exiting-returns-the-user-to-the-prior-scroll-context-of-the-feed-discover-list",
+      "title": "Improve video-mode transitions so entering and exiting full-screen video mode feels smooth and does not trigger state updates during render. Ensure the transition into VideoModeReel happens predictably when selecting the Videos filter, and exiting returns the user to the prior scroll context of the feed/discover list.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Restore missing icons across the app UI",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Create a single, scrollable screen/flow where users can access everything in one place (simplify navigation)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Adjust/improve video-mode transitions",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Restore missing icons and create a single scrollable hub for core actions",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
