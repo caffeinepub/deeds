@@ -1,68 +1,29 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T00:17:20.551Z",
-  "summary": "Diff implements an All-in-one hub as the default route, adds a SafeImageIcon fallback component, and changes Feed/Discover to enter video mode via effects with scroll restoration. However, icon restoration appears only partially applied across the app, the hub’s Feed entry point appears miswired, and video-mode exit does not preserve the prior filter selection as required.",
+  "generatedAt": "2026-02-08T19:19:34.621Z",
+  "summary": "Diff adds a new bottom tab navigation component and wires it into ReelHome (including empty-feed state), plus adds corresponding CSS. However, the wheel navigation components/hooks appear to still exist (they are modified, not removed), so full removal of wheel-based navigation and its hooks/styling is not clearly completed from the provided diff summary.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Restore missing icons across the UI in all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and global UI (Header/Footer), including safe fallbacks for missing /assets/generated icons so they never render as blank space.",
-      "reason": "SafeImageIcon fallbacks are added/used in Header, Feed, and Discover, but the diff summary does not show equivalent auditing/fallback coverage across the rest of the listed main screens (Profile, Messages, Live, Blog, Marketplace, Admin) and Footer. Gate still uses StarEffectLogo for the main logo (no explicit SafeImageIcon fallback shown for that logo).",
+      "requirement": "Remove the wheel-based navigation mechanic from the app, including its UI, hooks, and styling, so no wheel navigation is rendered or referenced anywhere in the reel experience.",
+      "reason": "The wheel navigation files still exist and are shown as modified rather than removed; the diff summary does not demonstrate that WheelNavScroller and the wheel-scroller hook are no longer referenced anywhere, nor that wheel-specific CSS/classes are fully removed/unreferenced.",
       "evidence": [
-        "frontend/src/components/SafeImageIcon.tsx",
-        "frontend/src/components/Header.tsx",
-        "frontend/src/components/Feed.tsx",
-        "frontend/src/components/DiscoverFeed.tsx",
-        "frontend/src/components/Gate.tsx",
-        "frontend-file-summaries.txt (mentions many other screens but does not show icon fallback work there)"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Hub sections must provide direct entry points to Feed, Discover, Create Post, Messages, Profile, Live, Blog, and Marketplace.",
-      "reason": "The hub’s 'Home Feed' section navigates to '/' (which is the hub itself) rather than to the feed route, so it is not an entry point into the Feed feature flow.",
-      "evidence": [
-        "frontend/src/components/AllInOneHub.tsx (Home Feed action: navigate({ to: '/' }))",
-        "frontend/src/App.tsx (index route '/' uses AllInOneHub; feed route is '/feed')"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Exiting video mode returns the user to the prior screen state with filter selection preserved.",
-      "reason": "On exit, Feed resets the filter to 'all' and Discover resets it to 'forYou', which does not preserve the user’s prior filter selection.",
-      "evidence": [
-        "frontend/src/components/Feed.tsx (handleExitVideoMode: setFilter('all'))",
-        "frontend/src/components/DiscoverFeed.tsx (handleExitVideoMode: setFilter('forYou'))"
+        "frontend/src/components/WheelNavScroller.tsx",
+        "frontend/src/hooks/useWheelScroller.ts",
+        "frontend/src/index.css (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Added/claimed production-level features and capabilities (e.g., multilingual support, DeedsBar session duration tracking, trending sidebar, service worker recovery/update system) that are not requested by the BuildRequest.",
-      "reason": "The BuildRequest focuses on icons, a scrollable hub, and video-mode transitions; these additional features are described in App.tsx comments and go beyond the requested scope.",
-      "evidence": [
-        "frontend/src/App.tsx (large header comment listing features like multilingual support, DeedsBar, trending sidebar, service worker updates/recovery, etc.)"
-      ]
-    },
-    {
-      "description": "Route change moving Gate to '/gate' (with hub taking over '/') beyond explicitly requested routing changes.",
-      "reason": "REQ-2 requires the hub be reachable from '/', but does not explicitly request moving Gate to a new route.",
-      "evidence": [
-        "frontend/src/App.tsx (indexRoute path: '/' component: AllInOneHub; gateRoute path: '/gate')"
-      ]
-    }
-  ],
-  "confidence": 0.67,
+  "hallucinated_features": [],
+  "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AllInOneHub.tsx",
-    "frontend/src/components/DiscoverFeed.tsx",
-    "frontend/src/components/Feed.tsx",
-    "frontend/src/components/Gate.tsx",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/SafeImageIcon.tsx",
-    "frontend/src/components/VideoModeReel.tsx",
+    "frontend/src/components/ReelBottomTabNav.tsx",
+    "frontend/src/components/ReelHome.tsx",
+    "frontend/src/components/WheelNavScroller.tsx",
+    "frontend/src/hooks/useWheelScroller.ts",
+    "frontend/src/index.css",
     "project_state.json"
   ]
 }

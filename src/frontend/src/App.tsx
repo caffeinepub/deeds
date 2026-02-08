@@ -7,14 +7,13 @@
  * - ✅ Indefinite hosting and persistent data storage
  * - ✅ No expiration dates or rebuild requirements
  * - ✅ All features fully operational:
- *   • Hybrid TikTok-Twitter Interface - Video reels and text posts
+ *   • TikTok-style Vertical Reel - Full-screen scroll-snap video feed
+ *   • Overlay Action Icons - Spark/Inspire/Comment/Share on each reel item
+ *   • Compact Bottom Navigation - One-tap access to all sections
  *   • Simplified Reaction System - Spark (red), Inspire (silver), Comment (cyan), Share (white)
  *   • DeedsBar - Real-time session duration tracking with battery indicator
  *   • Multilingual Support - Auto-detect and manual language switching (10 languages)
- *   • Trending Sidebar - Hashtags, top users, challenges
- *   • Full-screen Video Mode - Smooth vertical scrolling for video content
  *   • Service Worker Updates - Automatic update detection and recovery with reload guards
- *   • All-in-One Hub - Single scrollable page with all app features
  * 
  * IMPORTANT: This is a production application. All data is persistent and secure.
  */
@@ -30,6 +29,7 @@ import { hasRecoveryBeenAttempted, markRecoveryAttempted, isInRecoveryCooldown }
 
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ReelHome from './components/ReelHome';
 import AllInOneHub from './components/AllInOneHub';
 import Gate from './components/Gate';
 import Feed from './components/Feed';
@@ -46,6 +46,7 @@ import StartupRecoveryScreen from './components/StartupRecoveryScreen';
 import TopLevelErrorBoundary from './components/TopLevelErrorBoundary';
 import UpdateAvailableBanner from './components/UpdateAvailableBanner';
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
+import { useLocation } from '@tanstack/react-router';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,13 +59,16 @@ const queryClient = new QueryClient({
 });
 
 function Layout() {
+  const location = useLocation();
+  const isReelRoute = location.pathname === '/';
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-1">
+      {!isReelRoute && <Header />}
+      <main className={isReelRoute ? 'h-screen' : 'flex-1'}>
         <Outlet />
       </main>
-      <Footer />
+      {!isReelRoute && <Footer />}
     </div>
   );
 }
@@ -76,6 +80,12 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
+  component: ReelHome,
+});
+
+const hubRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/hub',
   component: AllInOneHub,
 });
 
@@ -147,6 +157,7 @@ const serviceStatusRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  hubRoute,
   gateRoute,
   feedRoute,
   discoverRoute,

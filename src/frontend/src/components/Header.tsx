@@ -1,29 +1,19 @@
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useNavigate } from '@tanstack/react-router';
 import { Button } from './ui/button';
+import { MessageSquare } from 'lucide-react';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import LanguageSelector from './LanguageSelector';
-import { useLanguage } from '../contexts/LanguageContext';
-import { MessageSquare } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
 import SafeImageIcon from './SafeImageIcon';
 
-interface HeaderProps {
-  onMessagesClick?: () => void;
-}
-
-export default function Header({ onMessagesClick }: HeaderProps) {
-  const { t } = useLanguage();
+export default function Header() {
   const navigate = useNavigate();
   const { login, clear, loginStatus, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
 
   const isAuthenticated = !!identity;
   const disabled = loginStatus === 'logging-in';
-  const text = loginStatus === 'logging-in' 
-    ? 'Logging in...' 
-    : isAuthenticated 
-    ? t('action.logout')
-    : t('action.login');
+  const text = loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login';
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -43,41 +33,45 @@ export default function Header({ onMessagesClick }: HeaderProps) {
   };
 
   const handleLogoClick = () => {
-    navigate({ to: '/' });
+    navigate({ to: '/hub' });
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/90 shadow-sm">
-      <div className="container flex h-16 items-center justify-between max-w-7xl mx-auto px-4 sm:px-6">
-        <div 
-          className="flex items-center justify-center cursor-pointer"
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4">
+        <button
           onClick={handleLogoClick}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <SafeImageIcon
-            src="/assets/generated/updated-deeds-header-logo-white-glow-d-star-effect.dim_300x100.png"
+            src="/assets/generated/deeds-header-logo-star-flash-enhanced.dim_300x100.png"
             alt="Deeds"
-            className="h-10 w-auto object-contain block"
+            className="h-10 w-auto"
             fallbackText="Deeds"
           />
-        </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {isAuthenticated && onMessagesClick && (
+        </button>
+
+        <div className="flex items-center gap-3">
+          <LanguageSelector />
+          {isAuthenticated && (
             <Button
-              onClick={onMessagesClick}
               variant="ghost"
               size="icon"
-              className="rounded-full hover:bg-primary/10 transition-all"
-              aria-label="Messages"
+              onClick={() => navigate({ to: '/messages' })}
+              className="relative"
             >
-              <MessageSquare className="h-5 w-5 text-primary" />
+              <MessageSquare className="h-5 w-5" />
             </Button>
           )}
-          <LanguageSelector />
           <Button
             onClick={handleAuth}
             disabled={disabled}
             variant={isAuthenticated ? 'outline' : 'default'}
-            className="rounded-full font-semibold shadow-sm hover:shadow-md transition-all bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-0"
+            className={
+              isAuthenticated
+                ? ''
+                : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white'
+            }
           >
             {text}
           </Button>

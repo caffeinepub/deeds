@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Restore missing icons throughout the app and make core actions accessible from a single, scrollable hub, while smoothing video-mode transitions.
+**Goal:** Remove the wheel-based reel navigation and replace it with a simpler, modern navigation mechanic that works well on mobile and desktop.
 
 **Planned changes:**
-- Audit and fix icon rendering across all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and global UI (Header/Footer), covering both lucide-react and `/assets/generated` image icons.
-- Add safe UI fallbacks for any icon image load failures so buttons/controls never appear blank.
-- Add a single, vertically scrollable “All-in-one” hub as the default entry route (`/`) with clearly labeled, icon-visible sections linking to: Feed, Discover, Create Post, Messages, Profile, Live, Blog, Marketplace.
-- Improve full-screen video-mode transitions so entering/exiting is smooth, avoids state updates during render, reliably enters via the Videos filter, and returns to the prior scroll context with state preserved.
+- Remove all wheel navigation code from the reel experience (UI components, hooks, event listeners, and wheel-specific styling/classes) so it is no longer imported, rendered, or referenced anywhere.
+- Implement a new simple navigation UI on the main reel route (`/`) that provides one-tap access to core sections (Home/Reel, Discover, Create Post, Messages, Profile, Hub).
+- Update `ReelHome` (including empty-feed state) and related layout logic to use only the new navigation (no duplicate/confusing navigation patterns), and ensure all targets route correctly (`/`, `/discover`, `/messages`, `/profile`, `/hub`).
+- Apply a coherent, distinct visual theme to the new navigation and reel experience (simple, modern; avoid blue/purple as the primary identity unless already present) with clear, accessible active states and English labels/aria-labels.
 
-**User-visible outcome:** Icons consistently appear across the app (with non-blank fallbacks if an asset fails), users can access core features from one scrollable hub at `/`, and video-mode transitions feel smooth and return users to where they left off.
+**User-visible outcome:** The reel-first experience no longer shows the wheel scroller; users get a simple, consistent navigation control on `/` that lets them quickly switch between core sections and open Create Post without interfering with the reel feed’s vertical scrolling.

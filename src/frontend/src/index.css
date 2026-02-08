@@ -4,119 +4,52 @@
 
 @layer base {
   :root {
-    /* Red and White Brand Color Palette - OKLCH Format (Deeds with arrowhead-d) */
-    /* Primary: Vibrant Red */
-    --primary: oklch(0.55 0.22 25);
-    --primary-foreground: oklch(0.98 0.01 0);
-
-    /* Secondary: Deep Red */
-    --secondary: oklch(0.40 0.18 25);
-    --secondary-foreground: oklch(0.98 0.01 0);
-
-    /* Accent: Bright Red */
-    --accent: oklch(0.65 0.24 25);
-    --accent-foreground: oklch(0.98 0.01 0);
-
-    /* Red Accent for Futuristic Effects */
-    --red-accent: oklch(0.60 0.22 25);
-    --red-glow: oklch(0.65 0.24 25);
-
-    /* Bright Red for Digital Effects */
-    --red-bright: oklch(0.70 0.26 25);
-
-    /* Muted tones */
-    --muted: oklch(0.92 0.01 0);
-    --muted-foreground: oklch(0.45 0.02 0);
-
-    /* Background and foreground - Clean White primary */
-    --background: oklch(1.0 0 0);
-    --foreground: oklch(0.15 0.02 0);
-
-    /* Lighter shade background - reduced saturation and increased lightness for softer tone */
-    --background-lighter: oklch(0.98 0.005 0);
-
-    /* Card styling - White */
-    --card: oklch(1.0 0 0);
-    --card-foreground: oklch(0.15 0.02 0);
-
-    /* Popover styling - White */
-    --popover: oklch(1.0 0 0);
-    --popover-foreground: oklch(0.15 0.02 0);
-
-    /* Border and input */
-    --border: oklch(0.88 0.01 0);
-    --input: oklch(0.88 0.01 0);
-
-    /* Ring for focus states - Red glow */
-    --ring: oklch(0.55 0.22 25);
-
-    /* Destructive (error states) */
-    --destructive: oklch(0.58 0.24 25);
-    --destructive-foreground: oklch(0.98 0.01 0);
-
-    /* Success states */
-    --success: oklch(0.60 0.15 145);
-    --success-foreground: oklch(0.98 0.01 0);
-
-    /* Warning states */
-    --warning: oklch(0.70 0.18 75);
-    --warning-foreground: oklch(0.15 0.02 0);
-
-    /* Chart colors */
-    --chart-1: oklch(0.55 0.22 25);
-    --chart-2: oklch(0.65 0.24 25);
-    --chart-3: oklch(0.40 0.18 25);
-    --chart-4: oklch(0.70 0.26 25);
-    --chart-5: oklch(0.50 0.20 25);
-
-    /* Radius */
-    --radius: 0.75rem;
+    --background: oklch(100% 0 0);
+    --foreground: oklch(15% 0 0);
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(15% 0 0);
+    --popover: oklch(100% 0 0);
+    --popover-foreground: oklch(15% 0 0);
+    --primary: oklch(55% 0.22 25);
+    --primary-foreground: oklch(100% 0 0);
+    --secondary: oklch(96% 0 0);
+    --secondary-foreground: oklch(15% 0 0);
+    --muted: oklch(96% 0 0);
+    --muted-foreground: oklch(45% 0 0);
+    --accent: oklch(96% 0 0);
+    --accent-foreground: oklch(15% 0 0);
+    --destructive: oklch(55% 0.22 25);
+    --destructive-foreground: oklch(100% 0 0);
+    --border: oklch(90% 0 0);
+    --input: oklch(90% 0 0);
+    --ring: oklch(55% 0.22 25);
+    --radius: 0.5rem;
+    --success: oklch(60% 0.15 145);
+    --warning: oklch(75% 0.15 85);
   }
 
   .dark {
-    /* Dark mode: Red accents on dark backgrounds */
-    --primary: oklch(0.65 0.24 25);
-    --primary-foreground: oklch(0.98 0.01 0);
-
-    --secondary: oklch(0.25 0.02 0);
-    --secondary-foreground: oklch(0.98 0.01 0);
-
-    --accent: oklch(0.30 0.03 0);
-    --accent-foreground: oklch(0.98 0.01 0);
-
-    --muted: oklch(0.25 0.02 0);
-    --muted-foreground: oklch(0.65 0.02 0);
-
-    --background: oklch(0.15 0.02 0);
-    --foreground: oklch(0.98 0.01 0);
-
-    --background-lighter: oklch(0.18 0.02 0);
-
-    --card: oklch(0.15 0.02 0);
-    --card-foreground: oklch(0.98 0.01 0);
-
-    --popover: oklch(0.15 0.02 0);
-    --popover-foreground: oklch(0.98 0.01 0);
-
-    --border: oklch(0.25 0.02 0);
-    --input: oklch(0.25 0.02 0);
-
-    --ring: oklch(0.65 0.24 25);
-
-    --destructive: oklch(0.58 0.24 25);
-    --destructive-foreground: oklch(0.98 0.01 0);
-
-    --success: oklch(0.60 0.15 145);
-    --success-foreground: oklch(0.98 0.01 0);
-
-    --warning: oklch(0.70 0.18 75);
-    --warning-foreground: oklch(0.15 0.02 0);
-
-    --chart-1: oklch(0.65 0.24 25);
-    --chart-2: oklch(0.55 0.22 25);
-    --chart-3: oklch(0.45 0.20 25);
-    --chart-4: oklch(0.75 0.26 25);
-    --chart-5: oklch(0.60 0.22 25);
+    --background: oklch(15% 0 0);
+    --foreground: oklch(98% 0 0);
+    --card: oklch(15% 0 0);
+    --card-foreground: oklch(98% 0 0);
+    --popover: oklch(15% 0 0);
+    --popover-foreground: oklch(98% 0 0);
+    --primary: oklch(60% 0.22 25);
+    --primary-foreground: oklch(100% 0 0);
+    --secondary: oklch(25% 0 0);
+    --secondary-foreground: oklch(98% 0 0);
+    --muted: oklch(25% 0 0);
+    --muted-foreground: oklch(65% 0 0);
+    --accent: oklch(25% 0 0);
+    --accent-foreground: oklch(98% 0 0);
+    --destructive: oklch(60% 0.22 25);
+    --destructive-foreground: oklch(100% 0 0);
+    --border: oklch(25% 0 0);
+    --input: oklch(25% 0 0);
+    --ring: oklch(60% 0.22 25);
+    --success: oklch(65% 0.15 145);
+    --warning: oklch(80% 0.15 85);
   }
 }
 
@@ -131,71 +64,10 @@
 }
 
 @layer utilities {
-  /* Enhanced z-index management for login page */
-  .z-login-overlay {
-    z-index: 150;
-  }
-  .z-login-content {
-    z-index: 160;
-  }
-
-  /* Modal z-index utilities */
-  .z-modal-backdrop {
-    z-index: 199;
-  }
-  .z-modal-content {
-    z-index: 200;
-  }
-
-  /* Animation utilities */
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Login modal blocking utilities */
-  .login-modal-blocking {
-    pointer-events: auto !important;
-    touch-action: auto !important;
-  }
-
-  .login-modal-dimmed-bg {
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-  }
-
-  /* Enhanced button interaction feedback */
-  .button-active-feedback {
-    transition: all 0.15s ease;
-  }
-
-  .button-active-feedback:active {
-    transform: scale(0.97);
-  }
-
-  /* Smooth transitions for all interactive elements */
-  button,
-  a,
-  input,
-  select,
-  textarea {
-    transition: all 0.2s ease;
-  }
-
-  /* Horizontal scroll container utilities */
   .horizontal-scroll-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
     scroll-behavior: smooth;
   }
 
@@ -203,47 +75,109 @@
     display: none;
   }
 
-  /* Video mode reel utilities */
   .video-reel-container {
     scroll-snap-type: y mandatory;
-    overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   .video-reel-container::-webkit-scrollbar {
     display: none;
   }
 
-  /* Overscroll behavior */
+  .video-reel-item {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
   .overscroll-none {
     overscroll-behavior: none;
   }
+
+  .overscroll-y-none {
+    overscroll-behavior-y: none;
+  }
+
+  .shadow-premium {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-premium-hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Bottom tab navigation styles */
+  .reel-bottom-nav {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .reel-bottom-nav-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .reel-bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+    min-height: 64px;
+  }
+
+  .reel-bottom-nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .reel-bottom-nav-item:focus-visible {
+    outline: 2px solid oklch(55% 0.22 25);
+    outline-offset: 2px;
+  }
+
+  .reel-bottom-nav-item-active {
+    position: relative;
+  }
+
+  .reel-bottom-nav-item-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background: oklch(55% 0.22 25);
+    border-radius: 0 0 3px 3px;
+  }
 }
 
-/* Ensure dialogs and modals have white backgrounds and proper visibility */
-[role="dialog"],
-[role="alertdialog"] {
-  background-color: white !important;
-  color: oklch(0.15 0.02 0) !important;
+.z-100 {
+  z-index: 100;
 }
 
-.dark [role="dialog"],
-.dark [role="alertdialog"] {
-  background-color: oklch(0.15 0.02 0) !important;
-  color: oklch(0.98 0.01 0) !important;
+.z-199 {
+  z-index: 199;
 }
 
-/* Ensure proper image display without creating void areas */
-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
+.z-200 {
+  z-index: 200;
 }
 
-/* Prevent oversized clickable areas on logos */
-.logo-safe-hitbox {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  pointer-events: auto;
+.z-300 {
+  z-index: 300;
 }

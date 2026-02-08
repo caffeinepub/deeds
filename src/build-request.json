@@ -1,88 +1,97 @@
 {
   "kind": "build_request",
-  "title": "Restore missing icons and create a single scrollable hub for core actions",
+  "title": "Remove wheel navigation and replace with a simpler new navigation mechanic",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Restore missing icons across the UI by auditing all icon usage (lucide-react icons and /assets/generated image icons) and ensuring every icon renders correctly in all main screens (Gate, Feed, Discover, Profile, Messages, Live, Blog, Marketplace, Admin) and in global UI (Header/Footer). Add safe fallbacks so missing image assets do not render as blank space (e.g., show a minimal inline icon or text label when an icon URL fails to load).",
+      "text": "Remove the wheel-based navigation mechanic from the app, including its UI, hooks, and styling, so no wheel navigation is rendered or referenced anywhere in the reel experience.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-5"
+          "msg-7"
         ],
         "quotes": [
-          "Yes and all the icons are gone make it to where I can do everything essybin one place scrolling",
-          "Easy"
+          "Delete the wheel and go back to something simple and not out yet create something new"
         ]
       },
       "acceptanceCriteria": [
-        "On a fresh load, icons are visible in Header (logo and any action icons), Footer, and in each main page’s key action areas (buttons, tabs, cards, and section headers).",
-        "If any /assets/generated icon fails to load, the UI shows a non-blank fallback (no invisible buttons due to missing icons).",
-        "No console errors related to missing icon imports or invalid asset paths during normal navigation."
+        "WheelNavScroller is no longer imported or rendered (including on the ReelHome page and empty-feed state).",
+        "The wheel-scroller hook is no longer used anywhere in the app.",
+        "Wheel-specific CSS utilities/classes are removed or no longer referenced so they do not affect layout/behavior.",
+        "The reel feed scroll behavior is not blocked by any remaining wheel event listeners."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add a single, scrollable “All-in-one” hub screen where users can access the app’s primary features in one place via vertical scrolling. The hub must include clearly labeled sections (with visible icons) that provide direct entry points to: Feed, Discover, Create Post, Messages, Profile, Live, Blog, and Marketplace. The hub should be reachable from the default entry route (/) and should reduce the need to switch between separate pages for common actions.",
+      "text": "Implement a new simple, popular-feeling navigation mechanic (not a wheel) that is consistently available in the reel-first experience and is easy to use on mobile and desktop.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-7"
         ],
         "quotes": [
-          "make it to where I can do everything essybin one place scrolling"
+          "go back to something simple",
+          "create something new"
         ]
       },
       "acceptanceCriteria": [
-        "There is one main hub screen that presents the primary app actions/features as vertically stacked sections users can scroll through.",
-        "Each hub section provides an obvious, single-tap/click action that navigates to (or opens) the corresponding feature flow (Feed, Discover, Create Post, Messages, Profile, Live, Blog, Marketplace).",
-        "The hub is usable on mobile without requiring horizontal scrolling for primary navigation."
+        "A replacement navigation UI is available on the main reel route ('/'), providing one-tap access to core sections (Home/Reel, Discover, Create Post, Messages, Profile, Hub).",
+        "Navigation supports mouse/touch and keyboard accessibility (tab focus + Enter/Space activation) with clear English labels/aria-labels.",
+        "Create Post opens the existing create-post flow/modal (no broken navigation or dead buttons).",
+        "The new navigation does not interfere with vertical scroll-snap usage on the reel feed."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Improve video-mode transitions so entering and exiting full-screen video mode feels smooth and does not trigger state updates during render. Ensure the transition into VideoModeReel happens predictably when selecting the Videos filter, and exiting returns the user to the prior scroll context of the feed/discover list.",
+      "text": "Update the reel page and any related layout logic so the new navigation mechanic replaces the wheel without introducing duplicate/confusing navigation patterns.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-7"
         ],
         "quotes": [
-          "want me to adjust how the video‑mode transitions in next?",
-          "Yes and all the icons are gone make it to where I can do everything essybin one place scrolling"
+          "Delete the wheel and go back to something simple"
         ]
       },
       "acceptanceCriteria": [
-        "Entering video mode does not rely on calling setState during render; it is handled via effects/event handlers.",
-        "Selecting the Videos filter transitions into the full-screen reel reliably without flicker.",
-        "Exiting video mode returns to the previous screen state (filter selection preserved; user not forced back to a different route unexpectedly)."
+        "ReelHome uses the new navigation component instead of WheelNavScroller (including the empty-feed state).",
+        "The navigation appears in a single, consistent place on the reel route (no duplicated wheel + bottom nav combinations).",
+        "All navigation targets route correctly using the existing router paths ('/', '/discover', '/messages', '/profile', '/hub')."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Apply a coherent, distinct visual theme across the new navigation and reel experience that feels modern and addictive while staying simple (avoid blue/purple as the primary identity unless already present).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "something simple",
+          "create something new"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The navigation component has a consistent visual style (colors, typography, spacing, states) that matches the rest of the app.",
+        "Active/selected state is clearly visible and accessible (sufficient contrast, not color-only).",
+        "User-facing text in the new UI is in English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts(x) or frontend/src/hooks/useActor.ts (immutable paths).",
-    "Keep backend as a single Motoko actor; no new backend services.",
-    "Use English for all user-facing text added or changed."
+    "Do not edit files under frontend/src/components/ui (read-only shadcn components); compose them instead.",
+    "Do not edit immutable hook/entry files listed by the platform (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
+    "Backend must remain single-actor (Motoko) and unchanged unless strictly required for navigation changes."
   ],
   "nonGoals": [
-    "Implementing new backend data models or adding new persistence for navigation preferences.",
-    "Adding third-party authentication providers or external databases.",
-    "Building real-time features (WebSockets/push notifications) as part of the hub or messaging."
+    "Do not add new backend features, schemas, or persistence to support the navigation change.",
+    "Do not implement third-party auth or external integrations.",
+    "Do not change existing route structure beyond what is necessary to swap the navigation UI."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }
