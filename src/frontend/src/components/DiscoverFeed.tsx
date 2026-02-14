@@ -1,91 +1,45 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useGetAllPosts } from '../hooks/useQueries';
 import PostCard from './PostCard';
 import SkeletonPost from './SkeletonPost';
 import { Card, CardContent } from './ui/card';
-import VideoModeReel from './VideoModeReel';
 import { useHorizontalWheelScroll } from '../hooks/useHorizontalWheelScroll';
 import SafeImageIcon from './SafeImageIcon';
-import { Compass } from 'lucide-react';
+import { TrendingUp, Video, Image as ImageIcon, Sparkles } from 'lucide-react';
 
-type DiscoverFilter = 'forYou' | 'trending' | 'videos' | 'photos';
+type FilterType = 'forYou' | 'trending' | 'videos' | 'photos';
 
 export default function DiscoverFeed() {
   const { data: posts, isLoading } = useGetAllPosts();
-  const [filter, setFilter] = useState<DiscoverFilter>('forYou');
-  const [videoModeActive, setVideoModeActive] = useState(false);
+  const [filter, setFilter] = useState<FilterType>('forYou');
   const filterContainerRef = useRef<HTMLDivElement>(null);
-  const prevFilterRef = useRef<DiscoverFilter>('forYou');
-  const scrollPositionRef = useRef<number>(0);
 
   useHorizontalWheelScroll(filterContainerRef);
 
-  useEffect(() => {
-    if (filter === 'videos' && prevFilterRef.current !== 'videos') {
-      scrollPositionRef.current = window.scrollY;
-      setVideoModeActive(true);
+  const filteredPosts = posts?.filter((post) => {
+    if (filter === 'videos') return !!post.video;
+    if (filter === 'photos') return !!post.photo && !post.video;
+    return true;
+  }) || [];
+
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+    if (filter === 'trending') {
+      return Number(b.likes - a.likes);
     }
-    prevFilterRef.current = filter;
-  }, [filter]);
+    return Number(b.timestamp - a.timestamp);
+  });
 
-  const handleExitVideoMode = () => {
-    setVideoModeActive(false);
-    setFilter('forYou');
-    requestAnimationFrame(() => {
-      window.scrollTo(0, scrollPositionRef.current);
-    });
-  };
-
-  const getFilteredPosts = () => {
-    if (!posts) return [];
-
-    let filtered = [...posts];
-
-    if (filter === 'videos') {
-      filtered = filtered.filter(p => !!p.video);
-    } else if (filter === 'photos') {
-      filtered = filtered.filter(p => !!p.photo && !p.video);
-    } else if (filter === 'trending') {
-      filtered.sort((a, b) => Number(b.likes - a.likes));
-    } else {
-      const engagementScore = (p: typeof posts[0]) => Number(p.likes) * 2 + Number(p.comments);
-      filtered.sort((a, b) => engagementScore(b) - engagementScore(a));
-    }
-
-    return filtered;
-  };
-
-  const filteredPosts = getFilteredPosts();
-  const videoPosts = filteredPosts.filter(p => !!p.video);
-
-  if (videoModeActive && videoPosts.length > 0) {
-    return (
-      <VideoModeReel
-        posts={videoPosts}
-        onExit={handleExitVideoMode}
-      />
-    );
-  }
-
-  const filters: { value: DiscoverFilter; label: string }[] = [
-    { value: 'forYou', label: 'For You' },
-    { value: 'trending', label: 'Trending' },
-    { value: 'videos', label: 'Videos' },
-    { value: 'photos', label: 'Photos' },
+  const filters: { value: FilterType; label: string; icon: React.ReactNode }[] = [
+    { value: 'forYou', label: 'For You', icon: <Sparkles className="h-4 w-4" strokeWidth={2} /> },
+    { value: 'trending', label: 'Trending', icon: <TrendingUp className="h-4 w-4" strokeWidth={2} /> },
+    { value: 'videos', label: 'Videos', icon: <Video className="h-4 w-4" strokeWidth={2} /> },
+    { value: 'photos', label: 'Photos', icon: <ImageIcon className="h-4 w-4" strokeWidth={2} /> },
   ];
 
   return (
     <div className="container py-6 pb-24 max-w-2xl mx-auto px-4 relative z-10">
       <div className="mb-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <SafeImageIcon
-            src="/assets/generated/discover-icon-transparent.dim_64x64.png"
-            alt="Discover"
-            className="h-10 w-10"
-            fallbackIcon={<Compass className="h-10 w-10 text-primary" />}
-          />
-          <h1 className="text-3xl font-bold">Discover</h1>
-        </div>
+        <h1 className="text-3xl font-bold">Discover</h1>
 
         <div 
           ref={filterContainerRef}
@@ -96,12 +50,13 @@ export default function DiscoverFeed() {
               <button
                 key={f.value}
                 onClick={() => setFilter(f.value)}
-                className={`px-4 py-2 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${
                   filter === f.value
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-muted hover:bg-muted/80'
+                    ? 'bg-primary text-primary-foreground shadow-tech'
+                    : 'bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card'
                 }`}
               >
+                {f.icon}
                 {f.label}
               </button>
             ))}
@@ -115,22 +70,22 @@ export default function DiscoverFeed() {
             <SkeletonPost key={i} />
           ))}
         </div>
-      ) : filteredPosts.length === 0 ? (
-        <Card className="shadow-lg border-2">
+      ) : sortedPosts.length === 0 ? (
+        <Card className="tech-card">
           <CardContent className="py-16 text-center space-y-4">
             <SafeImageIcon
               src="/assets/generated/empty-feed-premium.dim_400x300.png"
-              alt="No content"
+              alt="No posts"
               className="mx-auto mb-4 h-32 w-auto opacity-50"
-              fallbackIcon={<Compass className="h-32 w-32 mx-auto opacity-50" />}
+              fallbackIcon={<ImageIcon className="h-32 w-32 mx-auto opacity-50" />}
             />
-            <h3 className="text-xl font-semibold">No content to discover yet</h3>
-            <p className="text-muted-foreground">Check back soon for new posts!</p>
+            <h3 className="text-xl font-semibold">No posts yet</h3>
+            <p className="text-muted-foreground">Start exploring!</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-6">
-          {filteredPosts.map((post) => (
+          {sortedPosts.map((post) => (
             <PostCard key={post.id} post={post} />
           ))}
         </div>

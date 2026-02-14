@@ -9,6 +9,7 @@ import {
   useSaveCallerUserProfile,
   useGetUserAlbums,
 } from '../hooks/useQueries';
+import { useDeedsUsage } from '../hooks/useDeedsUsage';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -18,7 +19,7 @@ import FollowersModal from './FollowersModal';
 import FollowingModal from './FollowingModal';
 import NotificationsPanel from './NotificationsPanel';
 import UpdateStatusModal from './UpdateStatusModal';
-import AnimatedDeedsBar from './AnimatedDeedsBar';
+import DeedsBar from './DeedsBar';
 import GradeDeedsRating from './GradeDeedsRating';
 import { ExternalBlob } from '../backend';
 import { toast } from 'sonner';
@@ -47,16 +48,7 @@ export default function Profile({ onMessagesClick }: ProfileProps) {
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   
-  const [sessionStart] = useState(Date.now());
-  const [sessionDuration, setSessionDuration] = useState(0);
-  const [dailyUsage] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSessionDuration(Date.now() - sessionStart);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [sessionStart]);
+  const { sessionDuration, dailyUsage } = useDeedsUsage();
 
   const userPosts = allPosts?.filter(
     (post) => post.author.toString() === currentUserPrincipal?.toString()
@@ -234,8 +226,8 @@ export default function Profile({ onMessagesClick }: ProfileProps) {
         ctx.restore();
 
         particle.y -= particle.speed;
-        particle.x += Math.sin(particle.twinklePhase * 0.5) * 0.3;
-        
+        particle.x += Math.sin(particle.y * 0.01) * 0.3;
+
         if (particle.y < -10) {
           particle.y = canvas.height + 10;
           particle.x = Math.random() * canvas.width;
@@ -248,405 +240,297 @@ export default function Profile({ onMessagesClick }: ProfileProps) {
     animate();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
       cancelAnimationFrame(animationFrame);
+      window.removeEventListener('resize', resizeCanvas);
     };
-  }, [profile]);
+  }, []);
 
-  if (profileError) {
+  if (profileLoading) {
     return (
-      <div className="relative min-h-screen bg-white">
-        <div className="container py-8 pb-24 max-w-4xl mx-auto px-4">
-          <Card className="shadow-lg border-2 border-destructive/20">
-            <CardContent className="py-16 text-center space-y-4">
-              <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
-              <h3 className="text-2xl font-bold text-destructive">Error Loading Profile</h3>
-              <p className="text-muted-foreground">
-                There was an error loading your profile. Please try refreshing the page.
-              </p>
-              <Button onClick={() => window.location.reload()} className="mt-4">
-                Refresh Page
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (profileLoading || !isFetched) {
+  if (profileError || !profile) {
     return (
-      <div className="relative min-h-screen bg-white">
-        <div className="container py-8 pb-24 max-w-4xl mx-auto px-4">
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile && isFetched) {
-    return (
-      <div className="relative min-h-screen bg-white">
-        <div className="container py-8 pb-24 max-w-4xl mx-auto px-4">
-          <Card className="shadow-lg border-2 border-destructive/20">
-            <CardContent className="py-16 text-center space-y-4">
-              <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
-              <p className="text-muted-foreground text-lg">{t('profile.notFound')}</p>
-              <p className="text-sm text-muted-foreground">
-                Please try logging out and logging back in.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Profile Error</h2>
+        <p className="text-muted-foreground text-center">
+          {profileError ? 'Failed to load profile' : 'Profile not found'}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-white">
-      <div className="relative container py-8 pb-24 max-w-4xl mx-auto px-4">
-        <div className="mb-8 flex justify-center">
-          <div className="w-full max-w-2xl">
-            <AnimatedDeedsBar
-              sessionDuration={sessionDuration}
-              dailyUsage={dailyUsage}
-              onWarning={() => toast.warning('⚠️ 1 minute until auto-logout')}
-              onTimeout={() => toast.error('Session timeout - please log in again')}
-            />
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Cover Photo */}
+      <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden mb-6 shadow-lg">
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        {profile.layoutPreferences && (
+          <img
+            src={profile.layoutPreferences}
+            alt="Cover"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <label className="absolute bottom-4 right-4 cursor-pointer">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleCoverPhotoChange}
+            className="hidden"
+            disabled={uploadingCover}
+          />
+          <Button size="sm" variant="secondary" disabled={uploadingCover}>
+            {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4 mr-2" />}
+            {uploadingCover ? 'Uploading...' : 'Edit Cover'}
+          </Button>
+        </label>
+      </div>
+
+      {/* Profile Header */}
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
+        <div className="flex flex-col items-center md:items-start">
+          <div className="relative -mt-16 md:-mt-20">
+            <Avatar className="h-32 w-32 border-4 border-background shadow-xl">
+              <AvatarImage src={profile.profilePicture?.getDirectURL()} alt={profile.name} />
+              <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">
+                {getInitials(profile.name)}
+              </AvatarFallback>
+            </Avatar>
+            <label className="absolute bottom-0 right-0 cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePictureChange}
+                className="hidden"
+                disabled={uploadingProfile}
+              />
+              <Button size="icon" variant="secondary" className="rounded-full h-10 w-10 shadow-lg" disabled={uploadingProfile}>
+                {uploadingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+              </Button>
+            </label>
           </div>
         </div>
 
-        <Card className="mb-8 bg-white shadow-xl border-border/50 rounded-2xl overflow-hidden">
-          <div className="relative h-48 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20">
-            {profile?.layoutPreferences ? (
-              <img
-                src={profile.layoutPreferences}
-                alt="Cover"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20" />
-            )}
-            <label
-              htmlFor="coverPhotoInput"
-              className="absolute bottom-4 right-4 bg-white hover:bg-gray-50 p-2 rounded-full cursor-pointer shadow-lg transition-all hover:scale-110 border-2 border-white z-10"
-            >
-              {uploadingCover ? (
-                <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              ) : (
-                <Camera className="h-5 w-5 text-primary" />
-              )}
-              <input
-                id="coverPhotoInput"
-                type="file"
-                accept="image/*"
-                onChange={handleCoverPhotoChange}
-                className="hidden"
-                disabled={uploadingCover}
-              />
-            </label>
-          </div>
-
-          <CardHeader className="pb-4 pt-8 -mt-16 relative z-10">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex flex-col items-center gap-4 w-full">
-                <CardTitle className="text-3xl text-center text-foreground font-extrabold break-words px-4">
-                  {profile?.name}
-                </CardTitle>
-
-                <div className="relative flex-shrink-0">
-                  <Avatar className="h-32 w-32 ring-4 ring-white shadow-2xl">
-                    {profile?.profilePicture && (
-                      <AvatarImage
-                        src={profile.profilePicture.getDirectURL()}
-                        alt={profile.name}
-                      />
-                    )}
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-3xl font-bold">
-                      {getInitials(profile?.name || 'U')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <label
-                    htmlFor="profilePictureInput"
-                    className="absolute bottom-0 right-0 bg-white hover:bg-gray-50 p-2 rounded-full cursor-pointer shadow-lg transition-all hover:scale-110 border-2 border-white z-10"
-                  >
-                    {uploadingProfile ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    ) : (
-                      <Camera className="h-4 w-4 text-primary" />
-                    )}
-                    <input
-                      id="profilePictureInput"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePictureChange}
-                      className="hidden"
-                      disabled={uploadingProfile}
-                    />
-                  </label>
-                </div>
-
-                <div className="flex flex-col items-center gap-3 w-full px-4">
-                  {profile?.bio && (
-                    <p className="text-base text-muted-foreground leading-relaxed break-words text-center max-w-2xl">
-                      {profile.bio}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-6 text-sm pt-1 flex-wrap justify-center">
-                    <button
-                      onClick={() => setShowFollowers(true)}
-                      className="hover:underline text-foreground font-medium transition-colors hover:text-primary"
-                    >
-                      <span className="font-bold text-lg">{Number(profile?.followers || 0)}</span>{' '}
-                      <span className="text-muted-foreground">{t('profile.followers')}</span>
-                    </button>
-                    <button
-                      onClick={() => setShowFollowing(true)}
-                      className="hover:underline text-foreground font-medium transition-colors hover:text-primary"
-                    >
-                      <span className="font-bold text-lg">{Number(profile?.following || 0)}</span>{' '}
-                      <span className="text-muted-foreground">{t('profile.following')}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-2">
-                {onMessagesClick && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onMessagesClick}
-                    className="rounded-xl shadow-sm hover:shadow-md transition-all flex-shrink-0"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Messages
-                  </Button>
+        <div className="flex-1 text-center md:text-left">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{profile.name}</h1>
+              <p className="text-muted-foreground">{profile.bio || 'No bio yet'}</p>
+            </div>
+            <div className="flex gap-2 justify-center md:justify-start">
+              <Button onClick={() => setShowUpdateStatus(true)} variant="outline" size="sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Update Status
+              </Button>
+              <Button onClick={() => setShowNotifications(true)} variant="outline" size="sm" className="relative">
+                <Bell className="h-4 w-4 mr-2" />
+                Notifications
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
+                    {unreadNotifications}
+                  </span>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowNotifications(true)}
-                  className="relative rounded-xl shadow-sm hover:shadow-md transition-all flex-shrink-0"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unreadNotifications > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold shadow-md">
-                      {unreadNotifications}
-                    </span>
-                  )}
-                </Button>
-              </div>
+              </Button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-8 pt-2">
-            <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20">
-              <Award className="h-6 w-6 text-primary flex-shrink-0" />
-              <span className="font-bold text-lg text-foreground">
-                {sortedPosts.length} {sortedPosts.length === 1 ? 'Deed' : t('profile.deeds')}{' '}
-                Shared
-              </span>
-            </div>
-
-            <Separator className="my-6 bg-border/50" />
-            <div className="space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-yellow-500 via-pink-500 to-purple-500 bg-clip-text text-transparent flex items-center gap-2">
-                  <span className="text-2xl">✨</span>
-                  {t('profile.status')}
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowUpdateStatus(true)}
-                  className="h-10 gap-2 rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 transition-all px-4"
-                >
-                  <Edit className="h-4 w-4" />
-                  <span className="font-semibold">{t('profile.updateStatus')}</span>
-                </Button>
-              </div>
-              <div className="relative bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl p-6 border-2 border-transparent bg-clip-padding overflow-hidden shadow-lg"
-                style={{
-                  backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFD700 0%, #C0C0C0 25%, #FF69B4 50%, #8A2BE2 75%, #00BFFF 100%)',
-                  backgroundOrigin: 'border-box',
-                  backgroundClip: 'padding-box, border-box',
-                }}
-              >
-                <canvas
-                  ref={canvasRef}
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ zIndex: 0 }}
-                />
-                
-                <div className="relative" style={{ zIndex: 1 }}>
-                  {profile?.statusText || profile?.statusImage ? (
-                    <div className="space-y-4">
-                      {profile.statusText && (
-                        <p className="text-base font-medium text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words leading-relaxed">
-                          {profile.statusText}
-                        </p>
-                      )}
-                      {profile.statusImage && (
-                        <img
-                          src={profile.statusImage.getDirectURL()}
-                          alt="Status"
-                          className="w-full max-h-80 object-cover rounded-xl border-2 border-white/50 dark:border-gray-700/50 shadow-lg"
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-base text-gray-600 dark:text-gray-400 italic text-center py-4">
-                      ✨ No status set. Click "Update Status" to share what's on your mind! ✨
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {(photoAlbums.length > 0 || videoAlbums.length > 0) && (
-              <>
-                <Separator className="my-8 bg-border/50" />
-                <div className="space-y-8">
-                  <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
-                    <ImageIcon className="h-7 w-7 text-primary" />
-                    Album Section
-                  </h3>
-                  
-                  {photoAlbums.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="h-5 w-5 text-primary" />
-                        <h4 className="text-lg font-semibold">Photo Albums</h4>
-                        <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                          {photoAlbums.length}
-                        </span>
-                      </div>
-                      {photoAlbums.map((album) => (
-                        <div key={album.id} className="space-y-3">
-                          <h5 className="text-md font-semibold text-foreground">{album.name}</h5>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {album.photos.map((photo, index) => (
-                              <div
-                                key={index}
-                                className="aspect-square rounded-lg overflow-hidden border-2 border-border/50 hover:border-primary/60 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-xl cursor-pointer bg-muted"
-                              >
-                                <img
-                                  src={photo.getDirectURL()}
-                                  alt={`${album.name} photo ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {videoAlbums.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Video className="h-5 w-5 text-primary" />
-                        <h4 className="text-lg font-semibold">Video Albums</h4>
-                        <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                          {videoAlbums.length}
-                        </span>
-                      </div>
-                      {videoAlbums.map((album) => (
-                        <div key={album.id} className="space-y-3">
-                          <h5 className="text-md font-semibold text-foreground">{album.name}</h5>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {album.videos.map((video, index) => (
-                              <div
-                                key={index}
-                                className="aspect-square rounded-lg overflow-hidden border-2 border-border/50 hover:border-primary/60 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-xl cursor-pointer bg-black relative group"
-                              >
-                                <video
-                                  src={video.getDirectURL()}
-                                  className="w-full h-full object-cover"
-                                  muted
-                                  playsInline
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <Video className="h-8 w-8 text-white" />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {currentUserPrincipal && (
-          <div className="mb-8">
-            <GradeDeedsRating
-              userPrincipal={currentUserPrincipal.toString()}
-              isFriend={true}
-              onRate={(ratings) => {
-                console.log('Rating submitted:', ratings);
-              }}
-            />
           </div>
-        )}
 
-        <Card className="mb-6 bg-white shadow-xl border-border/50 rounded-2xl">
-          <CardHeader>
-            <CardTitle className="text-xl">Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-6 border border-primary/20">
-                <p className="text-sm text-muted-foreground font-semibold mb-1">Total Posts</p>
-                <p className="text-3xl font-extrabold text-primary">{sortedPosts.length}</p>
-              </div>
-              <div className="bg-gradient-to-br from-pink-500/10 to-purple-500/5 rounded-xl p-6 border border-pink-500/20">
-                <p className="text-sm text-muted-foreground font-semibold mb-1">Total Sparks</p>
-                <p className="text-3xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-                  {sortedPosts.reduce((sum, post) => sum + Number(post.likes), 0)}
-                </p>
-              </div>
-              <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/5 rounded-xl p-6 border border-cyan-500/20">
-                <p className="text-sm text-muted-foreground font-semibold mb-1">Total Comments</p>
-                <p className="text-3xl font-extrabold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                  {sortedPosts.reduce((sum, post) => sum + Number(post.comments), 0)}
-                </p>
-              </div>
+          <div className="flex gap-6 justify-center md:justify-start text-sm">
+            <button onClick={() => setShowFollowers(true)} className="hover:text-primary transition-colors">
+              <span className="font-bold">{Number(profile.followers)}</span> Followers
+            </button>
+            <button onClick={() => setShowFollowing(true)} className="hover:text-primary transition-colors">
+              <span className="font-bold">{Number(profile.following)}</span> Following
+            </button>
+            <div>
+              <span className="font-bold">{userPosts.length}</span> Posts
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </div>
 
-        {showFollowers && currentUserPrincipal && (
-          <FollowersModal
-            userPrincipal={currentUserPrincipal}
-            onClose={() => setShowFollowers(false)}
-          />
-        )}
+      <Separator className="my-8" />
 
-        {showFollowing && currentUserPrincipal && (
-          <FollowingModal
-            userPrincipal={currentUserPrincipal}
-            onClose={() => setShowFollowing(false)}
-          />
-        )}
+      {/* Deeds Bar - Battery Style */}
+      <div className="mb-8">
+        <DeedsBar
+          sessionDuration={sessionDuration}
+          dailyUsage={dailyUsage}
+          onWarning={() => toast.warning('Session ending soon! Save your work.')}
+          onTimeout={() => toast.error('Session timeout reached')}
+        />
+      </div>
 
-        {showNotifications && (
-          <NotificationsPanel onClose={() => setShowNotifications(false)} />
-        )}
+      <Separator className="my-8" />
 
-        {showUpdateStatus && (
-          <UpdateStatusModal onClose={() => setShowUpdateStatus(false)} />
+      {/* Grade Deeds Report Card */}
+      <div className="mb-8">
+        <GradeDeedsRating
+          userPrincipal={currentUserPrincipal?.toString() || ''}
+          isFriend={true}
+          onRate={(ratings) => {
+            console.log('Ratings submitted:', ratings);
+          }}
+        />
+      </div>
+
+      <Separator className="my-8" />
+
+      {/* Albums Section */}
+      {(photoAlbums.length > 0 || videoAlbums.length > 0) && (
+        <>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <ImageIcon className="h-6 w-6 text-primary" />
+              Albums
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {photoAlbums.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5" />
+                      Photo Albums ({photoAlbums.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {photoAlbums.map((album) => (
+                        <div key={album.id} className="border rounded-lg p-4">
+                          <h3 className="font-semibold mb-2">{album.name}</h3>
+                          <div className="grid grid-cols-3 gap-2">
+                            {album.photos.slice(0, 3).map((photo, idx) => (
+                              <img
+                                key={idx}
+                                src={photo.getDirectURL()}
+                                alt={`${album.name} ${idx + 1}`}
+                                className="w-full h-24 object-cover rounded"
+                              />
+                            ))}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {album.photos.length} photo{album.photos.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {videoAlbums.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Video className="h-5 w-5" />
+                      Video Albums ({videoAlbums.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {videoAlbums.map((album) => (
+                        <div key={album.id} className="border rounded-lg p-4">
+                          <h3 className="font-semibold mb-2">{album.name}</h3>
+                          <div className="grid grid-cols-3 gap-2">
+                            {album.videos.slice(0, 3).map((video, idx) => (
+                              <video
+                                key={idx}
+                                src={video.getDirectURL()}
+                                className="w-full h-24 object-cover rounded"
+                                controls={false}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {album.videos.length} video{album.videos.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+          <Separator className="my-8" />
+        </>
+      )}
+
+      {/* Posts Section */}
+      <div>
+        <h2 className="text-2xl font-bold mb-6">My Posts</h2>
+        {postsLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : sortedPosts.length === 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <p className="text-muted-foreground">No posts yet. Share your first deed!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sortedPosts.map((post) => (
+              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-0">
+                  {post.photo && (
+                    <img
+                      src={post.photo.getDirectURL()}
+                      alt="Post"
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
+                  {post.video && (
+                    <video
+                      src={post.video.getDirectURL()}
+                      className="w-full h-48 object-cover"
+                      controls
+                    />
+                  )}
+                  <div className="p-4">
+                    <p className="text-sm line-clamp-2">{post.caption}</p>
+                    <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                      <span>{Number(post.likes)} likes</span>
+                      <span>{Number(post.comments)} comments</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
+
+      {/* Modals */}
+      {showFollowers && currentUserPrincipal && (
+        <FollowersModal
+          userPrincipal={currentUserPrincipal}
+          onClose={() => setShowFollowers(false)}
+        />
+      )}
+      {showFollowing && currentUserPrincipal && (
+        <FollowingModal
+          userPrincipal={currentUserPrincipal}
+          onClose={() => setShowFollowing(false)}
+        />
+      )}
+      {showNotifications && (
+        <NotificationsPanel
+          onClose={() => setShowNotifications(false)}
+        />
+      )}
+      {showUpdateStatus && (
+        <UpdateStatusModal
+          onClose={() => setShowUpdateStatus(false)}
+        />
+      )}
     </div>
   );
 }
-

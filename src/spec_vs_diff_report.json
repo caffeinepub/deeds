@@ -1,29 +1,67 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T19:19:34.621Z",
-  "summary": "Diff adds a new bottom tab navigation component and wires it into ReelHome (including empty-feed state), plus adds corresponding CSS. However, the wheel navigation components/hooks appear to still exist (they are modified, not removed), so full removal of wheel-based navigation and its hooks/styling is not clearly completed from the provided diff summary.",
+  "generatedAt": "2026-02-14T17:48:17.995Z",
+  "summary": "Diff implements a fixed bottom tab navigation (with Home/Discover/Create/Messages/Profile/Hub), adds bottom padding to prevent overlap, restores Profile route component wiring, and reintroduces DeedsBar usage tracking plus a Grade Deeds Report Card UI with a Rate Friend modal. Also includes several unrelated UI/feature changes (e.g., service worker recovery/update flows, multilingual/support/other app sections) not requested by the BuildRequest.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Remove the wheel-based navigation mechanic from the app, including its UI, hooks, and styling, so no wheel navigation is rendered or referenced anywhere in the reel experience.",
-      "reason": "The wheel navigation files still exist and are shown as modified rather than removed; the diff summary does not demonstrate that WheelNavScroller and the wheel-scroller hook are no longer referenced anywhere, nor that wheel-specific CSS/classes are fully removed/unreferenced.",
+      "id": "REQ-3",
+      "requirement": "Battery icon assets referenced by DeedsBar resolve correctly (no broken images).",
+      "reason": "DeedsBar references several /assets/generated/*.png paths, but the diff summary does not show any asset files added/verified, so asset existence cannot be confirmed from provided evidence.",
       "evidence": [
-        "frontend/src/components/WheelNavScroller.tsx",
-        "frontend/src/hooks/useWheelScroller.ts",
-        "frontend/src/index.css (truncated)"
+        "frontend/src/components/DeedsBar.tsx"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.72,
+  "hallucinated_features": [
+    {
+      "description": "Service worker update detection/recovery flow (recovery cooldown/attempt tracking, update banner, startup recovery screen).",
+      "reason": "Not requested; BuildRequest focuses on reverting bottom navigation and restoring Profile/Deeds UI, and explicitly lists non-goals like adding new functionality beyond restoration.",
+      "evidence": [
+        "frontend/src/App.tsx (imports hasRecoveryBeenAttempted/markRecoveryAttempted/isInRecoveryCooldown, ServiceStatusChecker, StartupRecoveryScreen, UpdateAvailableBanner, useServiceWorkerUpdate)",
+        "frontend-file-summaries.txt (\"Service Worker Updates - Automatic update detection and recovery with reload guards\")"
+      ]
+    },
+    {
+      "description": "Multilingual support (auto-detect and manual language switching).",
+      "reason": "Not requested in any REQ; unrelated to navigation/profile/deeds restoration.",
+      "evidence": [
+        "frontend/src/App.tsx (LanguageProvider)",
+        "frontend/src/components/Profile.tsx (useLanguage)",
+        "frontend-file-summaries.txt (\"Multilingual Support - Auto-detect and manual language switching (10 languages)\")"
+      ]
+    },
+    {
+      "description": "Addition/maintenance of broad stub implementations for many unrelated domain features in query hooks (Blog, LiveSession, Marketplace, etc.) to maintain frontend compatibility.",
+      "reason": "Not requested; BuildRequest explicitly says not to implement new backend systems and to focus on restoring existing UI/behavior.",
+      "evidence": [
+        "frontend-file-summaries.txt (\"frontend/src/hooks/useQueries.ts\": \"comprehensive stub implementations for Post, Comment, Blog, LiveSession, Marketplace, and other features not yet in backend\")"
+      ]
+    },
+    {
+      "description": "UI restyling/enhancements across Header/Footer/LoginPrompt/ProfileSetupModal/Feed/DiscoverFeed/CreatePostButton beyond the bottom-nav revert.",
+      "reason": "Not requested; REQ-1 asks to revert navigation to the previous layout rather than introduce new visual redesigns in multiple components.",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for Header.tsx, Footer.tsx, LoginPrompt.tsx, ProfileSetupModal.tsx, Feed.tsx, DiscoverFeed.tsx, CreatePostButton.tsx, etc.)"
+      ]
+    },
+    {
+      "description": "Expanded/featured app sections/routes beyond the requested router paths (e.g., /live, /blog, Marketplace, Space, AdminDashboard).",
+      "reason": "Not requested; REQ-1 specifies using existing router paths for the bottom navigation (/, /discover, /messages, /profile, /hub) and Create modal.",
+      "evidence": [
+        "frontend/src/App.tsx (imports/route definitions for LiveFeed, BlogPage, Marketplace, Space, AdminDashboard and routes like /live, /blog)"
+      ]
+    }
+  ],
+  "confidence": 0.68,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/DeedsBar.tsx",
+    "frontend/src/components/GradeDeedsRating.tsx",
+    "frontend/src/components/Profile.tsx",
     "frontend/src/components/ReelBottomTabNav.tsx",
-    "frontend/src/components/ReelHome.tsx",
-    "frontend/src/components/WheelNavScroller.tsx",
-    "frontend/src/hooks/useWheelScroller.ts",
-    "frontend/src/index.css",
+    "frontend/src/hooks/useDeedsUsage.ts",
     "project_state.json"
   ]
 }

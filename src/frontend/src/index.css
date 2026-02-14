@@ -4,49 +4,49 @@
 
 @layer base {
   :root {
-    --background: oklch(100% 0 0);
-    --foreground: oklch(15% 0 0);
+    --background: oklch(98% 0.005 240);
+    --foreground: oklch(15% 0.01 240);
     --card: oklch(100% 0 0);
-    --card-foreground: oklch(15% 0 0);
+    --card-foreground: oklch(15% 0.01 240);
     --popover: oklch(100% 0 0);
-    --popover-foreground: oklch(15% 0 0);
+    --popover-foreground: oklch(15% 0.01 240);
     --primary: oklch(55% 0.22 25);
     --primary-foreground: oklch(100% 0 0);
-    --secondary: oklch(96% 0 0);
-    --secondary-foreground: oklch(15% 0 0);
-    --muted: oklch(96% 0 0);
-    --muted-foreground: oklch(45% 0 0);
-    --accent: oklch(96% 0 0);
-    --accent-foreground: oklch(15% 0 0);
+    --secondary: oklch(96% 0.005 240);
+    --secondary-foreground: oklch(15% 0.01 240);
+    --muted: oklch(96% 0.005 240);
+    --muted-foreground: oklch(45% 0.01 240);
+    --accent: oklch(96% 0.005 240);
+    --accent-foreground: oklch(15% 0.01 240);
     --destructive: oklch(55% 0.22 25);
     --destructive-foreground: oklch(100% 0 0);
-    --border: oklch(90% 0 0);
-    --input: oklch(90% 0 0);
+    --border: oklch(90% 0.005 240);
+    --input: oklch(90% 0.005 240);
     --ring: oklch(55% 0.22 25);
-    --radius: 0.5rem;
+    --radius: 1rem;
     --success: oklch(60% 0.15 145);
     --warning: oklch(75% 0.15 85);
   }
 
   .dark {
-    --background: oklch(15% 0 0);
-    --foreground: oklch(98% 0 0);
-    --card: oklch(15% 0 0);
-    --card-foreground: oklch(98% 0 0);
-    --popover: oklch(15% 0 0);
-    --popover-foreground: oklch(98% 0 0);
+    --background: oklch(12% 0.015 240);
+    --foreground: oklch(98% 0.005 240);
+    --card: oklch(15% 0.015 240);
+    --card-foreground: oklch(98% 0.005 240);
+    --popover: oklch(15% 0.015 240);
+    --popover-foreground: oklch(98% 0.005 240);
     --primary: oklch(60% 0.22 25);
     --primary-foreground: oklch(100% 0 0);
-    --secondary: oklch(25% 0 0);
-    --secondary-foreground: oklch(98% 0 0);
-    --muted: oklch(25% 0 0);
-    --muted-foreground: oklch(65% 0 0);
-    --accent: oklch(25% 0 0);
-    --accent-foreground: oklch(98% 0 0);
+    --secondary: oklch(20% 0.015 240);
+    --secondary-foreground: oklch(98% 0.005 240);
+    --muted: oklch(20% 0.015 240);
+    --muted-foreground: oklch(65% 0.01 240);
+    --accent: oklch(20% 0.015 240);
+    --accent-foreground: oklch(98% 0.005 240);
     --destructive: oklch(60% 0.22 25);
     --destructive-foreground: oklch(100% 0 0);
-    --border: oklch(25% 0 0);
-    --input: oklch(25% 0 0);
+    --border: oklch(25% 0.015 240);
+    --input: oklch(25% 0.015 240);
     --ring: oklch(60% 0.22 25);
     --success: oklch(65% 0.15 145);
     --warning: oklch(80% 0.15 85);
@@ -64,6 +64,105 @@
 }
 
 @layer utilities {
+  /* Wavy background effect */
+  .wavy-bg {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wavy-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, oklch(55% 0.22 25 / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, oklch(55% 0.22 25 / 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, oklch(55% 0.22 25 / 0.02) 0%, transparent 50%);
+    animation: wave-drift 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .dark .wavy-bg::before {
+    background: 
+      radial-gradient(circle at 20% 50%, oklch(60% 0.22 25 / 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, oklch(60% 0.22 25 / 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, oklch(60% 0.22 25 / 0.04) 0%, transparent 50%);
+  }
+
+  @keyframes wave-drift {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -30px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  /* Tech card surface */
+  .tech-card {
+    background-color: oklch(from oklch(var(--card)) l c h / 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    @apply border rounded-2xl shadow-lg;
+    @apply hover:shadow-xl transition-all duration-300;
+    border-color: oklch(from oklch(var(--border)) l c h / 0.5);
+  }
+
+  .tech-card:hover {
+    border-color: oklch(from oklch(var(--primary)) l c h / 0.3);
+  }
+
+  .dark .tech-card {
+    background-color: oklch(from oklch(var(--card)) l c h / 0.9);
+    border-color: oklch(from oklch(var(--border)) l c h / 0.3);
+  }
+
+  /* Premium glass header */
+  .glass-header {
+    background-color: oklch(from oklch(var(--background)) l c h / 0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    @apply border-b;
+    border-color: oklch(from oklch(var(--border)) l c h / 0.5);
+  }
+
+  @supports (backdrop-filter: blur(24px)) {
+    .glass-header {
+      background-color: oklch(from oklch(var(--background)) l c h / 0.6);
+    }
+  }
+
+  .dark .glass-header {
+    background-color: oklch(from oklch(var(--background)) l c h / 0.7);
+    border-color: oklch(from oklch(var(--border)) l c h / 0.3);
+  }
+
+  /* Icon container */
+  .icon-container {
+    @apply flex items-center justify-center rounded-xl;
+    background: linear-gradient(135deg, oklch(from oklch(var(--primary)) l c h / 0.1) 0%, oklch(from oklch(var(--primary)) l c h / 0.05) 100%);
+    border: 1px solid oklch(from oklch(var(--primary)) l c h / 0.2);
+    @apply transition-all duration-300;
+  }
+
+  .icon-container:hover {
+    background: linear-gradient(135deg, oklch(from oklch(var(--primary)) l c h / 0.15) 0%, oklch(from oklch(var(--primary)) l c h / 0.1) 100%);
+    border-color: oklch(from oklch(var(--primary)) l c h / 0.3);
+    @apply scale-105;
+  }
+
+  .dark .icon-container {
+    background: linear-gradient(135deg, oklch(from oklch(var(--primary)) l c h / 0.2) 0%, oklch(from oklch(var(--primary)) l c h / 0.1) 100%);
+    border-color: oklch(from oklch(var(--primary)) l c h / 0.3);
+  }
+
   .horizontal-scroll-container {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -73,22 +172,6 @@
 
   .horizontal-scroll-container::-webkit-scrollbar {
     display: none;
-  }
-
-  .video-reel-container {
-    scroll-snap-type: y mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .video-reel-container::-webkit-scrollbar {
-    display: none;
-  }
-
-  .video-reel-item {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
   }
 
   .overscroll-none {
@@ -176,8 +259,4 @@
 
 .z-200 {
   z-index: 200;
-}
-
-.z-300 {
-  z-index: 300;
 }

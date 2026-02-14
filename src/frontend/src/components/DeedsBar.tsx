@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Progress } from './ui/progress';
+import SafeImageIcon from './SafeImageIcon';
+import { Clock } from 'lucide-react';
 
 interface DeedsBarProps {
   sessionDuration: number; // in milliseconds
@@ -15,15 +17,6 @@ const DAILY_LIMIT = 17 * 60 * 60 * 1000; // 17 hours in milliseconds
 
 export default function DeedsBar({ sessionDuration, dailyUsage, onWarning, onTimeout }: DeedsBarProps) {
   const [hasWarned, setHasWarned] = useState(false);
-  const [currentTime, setCurrentTime] = useState(Date.now());
-
-  // Update current time every second for real-time display
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     // Check for warning (1 minute before timeout)
@@ -70,7 +63,12 @@ export default function DeedsBar({ sessionDuration, dailyUsage, onWarning, onTim
     <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 shadow-lg">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
-          <img src="/assets/generated/deedsbar-timer-icon-red-metallic-transparent.dim_64x64.png" alt="Timer" className="h-6 w-6" />
+          <SafeImageIcon
+            src="/assets/generated/deedsbar-timer-icon-red-metallic-transparent.dim_64x64.png"
+            alt="Timer"
+            fallbackIcon={<Clock className="h-6 w-6" />}
+            className="h-6 w-6"
+          />
           Your Deeds Bar
         </CardTitle>
       </CardHeader>
@@ -79,16 +77,19 @@ export default function DeedsBar({ sessionDuration, dailyUsage, onWarning, onTim
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <img 
-                  src={getBatteryIcon()} 
-                  alt="Battery" 
+              <div 
+                className="relative"
+                style={{
+                  filter: getBatteryLevel() < 25 ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' : 'none'
+                }}
+              >
+                <SafeImageIcon
+                  src={getBatteryIcon()}
+                  alt="Battery"
+                  fallbackIcon={<Clock className="h-12 w-12" />}
                   className={`h-12 w-12 transition-all duration-500 ${
                     getBatteryLevel() < 25 ? 'animate-pulse' : ''
                   }`}
-                  style={{
-                    filter: getBatteryLevel() < 25 ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' : 'none'
-                  }}
                 />
               </div>
               <div>

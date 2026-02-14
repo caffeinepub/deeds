@@ -1,14 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useGetAllPosts } from '../hooks/useQueries';
 import PostCard from './PostCard';
 import CreatePostButton from './CreatePostButton';
 import SkeletonPost from './SkeletonPost';
 import { Card, CardContent } from './ui/card';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import VideoModeReel from './VideoModeReel';
 import { useHorizontalWheelScroll } from '../hooks/useHorizontalWheelScroll';
 import SafeImageIcon from './SafeImageIcon';
-import { Image } from 'lucide-react';
+import { Image, Video, FileText, Grid3x3 } from 'lucide-react';
 
 type FilterType = 'all' | 'following' | 'videos' | 'photos' | 'text';
 
@@ -16,28 +15,9 @@ export default function Feed() {
   const { identity } = useInternetIdentity();
   const { data: posts, isLoading } = useGetAllPosts();
   const [filter, setFilter] = useState<FilterType>('all');
-  const [videoModeActive, setVideoModeActive] = useState(false);
   const filterContainerRef = useRef<HTMLDivElement>(null);
-  const prevFilterRef = useRef<FilterType>('all');
-  const scrollPositionRef = useRef<number>(0);
 
   useHorizontalWheelScroll(filterContainerRef);
-
-  useEffect(() => {
-    if (filter === 'videos' && prevFilterRef.current !== 'videos') {
-      scrollPositionRef.current = window.scrollY;
-      setVideoModeActive(true);
-    }
-    prevFilterRef.current = filter;
-  }, [filter]);
-
-  const handleExitVideoMode = () => {
-    setVideoModeActive(false);
-    setFilter('all');
-    requestAnimationFrame(() => {
-      window.scrollTo(0, scrollPositionRef.current);
-    });
-  };
 
   const filteredPosts = posts?.filter((post) => {
     if (filter === 'all') return true;
@@ -48,22 +28,12 @@ export default function Feed() {
   }) || [];
 
   const sortedPosts = [...filteredPosts].sort((a, b) => Number(b.timestamp - a.timestamp));
-  const videoPosts = sortedPosts.filter(p => !!p.video);
 
-  if (videoModeActive && videoPosts.length > 0) {
-    return (
-      <VideoModeReel
-        posts={videoPosts}
-        onExit={handleExitVideoMode}
-      />
-    );
-  }
-
-  const filters: { value: FilterType; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'videos', label: 'Videos' },
-    { value: 'photos', label: 'Photos' },
-    { value: 'text', label: 'Text' },
+  const filters: { value: FilterType; label: string; icon: React.ReactNode }[] = [
+    { value: 'all', label: 'All', icon: <Grid3x3 className="h-4 w-4" strokeWidth={2} /> },
+    { value: 'videos', label: 'Videos', icon: <Video className="h-4 w-4" strokeWidth={2} /> },
+    { value: 'photos', label: 'Photos', icon: <Image className="h-4 w-4" strokeWidth={2} /> },
+    { value: 'text', label: 'Text', icon: <FileText className="h-4 w-4" strokeWidth={2} /> },
   ];
 
   return (
@@ -83,12 +53,13 @@ export default function Feed() {
               <button
                 key={f.value}
                 onClick={() => setFilter(f.value)}
-                className={`px-4 py-2 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${
                   filter === f.value
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-muted hover:bg-muted/80'
+                    ? 'bg-primary text-primary-foreground shadow-tech'
+                    : 'bg-card/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card'
                 }`}
               >
+                {f.icon}
                 {f.label}
               </button>
             ))}
@@ -103,7 +74,7 @@ export default function Feed() {
           ))}
         </div>
       ) : sortedPosts.length === 0 ? (
-        <Card className="shadow-lg border-2">
+        <Card className="tech-card">
           <CardContent className="py-16 text-center space-y-4">
             <SafeImageIcon
               src="/assets/generated/empty-feed-premium.dim_400x300.png"

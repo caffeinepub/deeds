@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Remove the wheel-based reel navigation and replace it with a simpler, modern navigation mechanic that works well on mobile and desktop.
+**Goal:** Revert the app UI to the prior experience by restoring the fixed bottom tab navigation and bringing back the Profile and Deeds features that existed before the updated/high-tech navigation.
 
 **Planned changes:**
-- Remove all wheel navigation code from the reel experience (UI components, hooks, event listeners, and wheel-specific styling/classes) so it is no longer imported, rendered, or referenced anywhere.
-- Implement a new simple navigation UI on the main reel route (`/`) that provides one-tap access to core sections (Home/Reel, Discover, Create Post, Messages, Profile, Hub).
-- Update `ReelHome` (including empty-feed state) and related layout logic to use only the new navigation (no duplicate/confusing navigation patterns), and ensure all targets route correctly (`/`, `/discover`, `/messages`, `/profile`, `/hub`).
-- Apply a coherent, distinct visual theme to the new navigation and reel experience (simple, modern; avoid blue/purple as the primary identity unless already present) with clear, accessible active states and English labels/aria-labels.
+- Replace the current navigation experience with a fixed bottom tab navigation bar (mobile and desktop) providing access to Home, Discover, Create (opens existing Create Post modal), Messages, Profile, and Hub using existing routes.
+- Restore the prior Profile page experience so `/profile` renders correctly and exposes the expected profile sections/actions (header, edit actions, followers/following, notifications, posts) and correctly reflects the active tab in bottom navigation.
+- Restore the DeedsBar battery-style session timer and daily usage limit UI (at minimum on Profile), including real-time session updates and client-side per-day usage tracking with daily reset.
+- Restore the “Grade Deeds Report Card” UI (at minimum on Profile), including core metrics/overall grade display and a working (dismissible) “Rate Friend” modal/dialog if present.
 
-**User-visible outcome:** The reel-first experience no longer shows the wheel scroller; users get a simple, consistent navigation control on `/` that lets them quickly switch between core sections and open Create Post without interfering with the reel feed’s vertical scrolling.
+**User-visible outcome:** Users see the old-style bottom navigation again, can reliably open the Profile page, and can view the Deeds battery usage/timer UI and the Grade Deeds Report Card feature as part of the app experience.

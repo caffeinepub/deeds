@@ -1,94 +1,92 @@
 {
   "kind": "build_request",
-  "title": "Remove wheel navigation and replace with a simpler new navigation mechanic",
-  "priority": "normal",
+  "title": "Revert to old bottom navigation and restore Profile + Deeds features",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Remove the wheel-based navigation mechanic from the app, including its UI, hooks, and styling, so no wheel navigation is rendered or referenced anywhere in the reel experience.",
+      "text": "Restore the previous primary navigation layout with the main icons fixed at the bottom of the screen (bottom tab navigation), replacing the current updated/high-tech icon navigation experience.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-4"
         ],
         "quotes": [
-          "Delete the wheel and go back to something simple and not out yet create something new"
+          "I hate it go back to the old version where the icons where at the bottom"
         ]
       },
       "acceptanceCriteria": [
-        "WheelNavScroller is no longer imported or rendered (including on the ReelHome page and empty-feed state).",
-        "The wheel-scroller hook is no longer used anywhere in the app.",
-        "Wheel-specific CSS utilities/classes are removed or no longer referenced so they do not affect layout/behavior.",
-        "The reel feed scroll behavior is not blocked by any remaining wheel event listeners."
+        "On mobile and desktop widths, a fixed bottom navigation bar is visible with the main navigation icons.",
+        "Bottom navigation includes clear access to: Home, Discover, Create, Messages, Profile, and Hub.",
+        "Bottom navigation does not visually conflict with page content (main content has adequate bottom padding so it is not obscured).",
+        "Navigation works via click/tap and uses the existing router paths (/, /discover, /messages, /profile, /hub) and opens the existing Create Post modal from the Create button."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement a new simple, popular-feeling navigation mechanic (not a wheel) that is consistently available in the reel-first experience and is easy to use on mobile and desktop.",
+      "text": "Restore the Profile page experience from the prior version so the Profile route (/profile) works correctly and presents the expected profile content and actions (view/edit profile, posts, followers/following, notifications, etc.).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-4"
         ],
         "quotes": [
-          "go back to something simple",
-          "create something new"
+          "...and profile page..."
         ]
       },
       "acceptanceCriteria": [
-        "A replacement navigation UI is available on the main reel route ('/'), providing one-tap access to core sections (Home/Reel, Discover, Create Post, Messages, Profile, Hub).",
-        "Navigation supports mouse/touch and keyboard accessibility (tab focus + Enter/Space activation) with clear English labels/aria-labels.",
-        "Create Post opens the existing create-post flow/modal (no broken navigation or dead buttons).",
-        "The new navigation does not interfere with vertical scroll-snap usage on the reel feed."
+        "Visiting /profile renders the Profile page without runtime errors.",
+        "Profile page supports the existing key sections/actions already present in the app (profile header, edit actions, followers/following modals, notifications panel, and user posts list) and they are reachable in the UI.",
+        "Bottom navigation can navigate to /profile and shows the Profile tab as active when on /profile."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Update the reel page and any related layout logic so the new navigation mechanic replaces the wheel without introducing duplicate/confusing navigation patterns.",
+      "text": "Restore the Deeds battery usage feature so users can see the DeedsBar battery-style session timer and daily usage limit UI as part of the user experience (as it was in the old version).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-4"
         ],
         "quotes": [
-          "Delete the wheel and go back to something simple"
+          "...and deeds battery usage feature..."
         ]
       },
       "acceptanceCriteria": [
-        "ReelHome uses the new navigation component instead of WheelNavScroller (including the empty-feed state).",
-        "The navigation appears in a single, consistent place on the reel route (no duplicated wheel + bottom nav combinations).",
-        "All navigation targets route correctly using the existing router paths ('/', '/discover', '/messages', '/profile', '/hub')."
+        "A DeedsBar battery-style UI is visible to the user (at minimum on the Profile page) showing session time and a battery percentage indicator.",
+        "Session timer updates in real time while the app is open.",
+        "Daily usage value is not hard-coded to 0; it is tracked client-side (e.g., persisted per-day locally) so it can increase across a day and reset on a new day.",
+        "Battery icon assets referenced by DeedsBar resolve correctly (no broken images)."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Apply a coherent, distinct visual theme across the new navigation and reel experience that feels modern and addictive while staying simple (avoid blue/purple as the primary identity unless already present).",
+      "text": "Restore the Deeds report card feature (“Grade Deeds Report Card”) so it is accessible again as part of the app experience (as it was in the old version).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-4"
         ],
         "quotes": [
-          "something simple",
-          "create something new"
+          "...and the deeds report card feature."
         ]
       },
       "acceptanceCriteria": [
-        "The navigation component has a consistent visual style (colors, typography, spacing, states) that matches the rest of the app.",
-        "Active/selected state is clearly visible and accessible (sufficient contrast, not color-only).",
-        "User-facing text in the new UI is in English."
+        "The “Grade Deeds Report Card” UI renders (at minimum on the Profile page) without runtime errors.",
+        "The report card shows the core metric sections and overall grade as visible UI content.",
+        "If the UI includes a “Rate Friend” action, it opens a modal/dialog successfully and can be dismissed."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (read-only shadcn components); compose them instead.",
-    "Do not edit immutable hook/entry files listed by the platform (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
-    "Backend must remain single-actor (Motoko) and unchanged unless strictly required for navigation changes."
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx (immutable paths).",
+    "Keep backend as a single Motoko actor (backend/main.mo); only introduce migration.mo if persistent state needs to change."
   ],
   "nonGoals": [
-    "Do not add new backend features, schemas, or persistence to support the navigation change.",
-    "Do not implement third-party auth or external integrations.",
-    "Do not change existing route structure beyond what is necessary to swap the navigation UI."
+    "Do not add new third-party authentication providers (only Internet Identity).",
+    "Do not implement a new backend ratings system for the report card unless explicitly requested; restoring the existing UI/behavior is the goal.",
+    "Do not introduce real-time/WebSocket functionality."
   ],
   "imageRequirements": {
     "required": [],

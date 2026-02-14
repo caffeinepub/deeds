@@ -1,5 +1,5 @@
 import { Home, Compass, PlusCircle, MessageSquare, User, LayoutGrid } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
 import CreatePostModal from './CreatePostModal';
 import { Button } from './ui/button';
@@ -14,8 +14,9 @@ interface NavItem {
 
 export default function ReelBottomTabNav() {
   const navigate = useNavigate();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const [activeTab, setActiveTab] = useState('home');
 
   const navItems: NavItem[] = [
     {
@@ -57,7 +58,6 @@ export default function ReelBottomTabNav() {
   ];
 
   const handleNavClick = (item: NavItem) => {
-    setActiveTab(item.id);
     if (item.action) {
       item.action();
     } else if (item.path) {
@@ -72,6 +72,11 @@ export default function ReelBottomTabNav() {
     }
   };
 
+  const isActive = (item: NavItem): boolean => {
+    if (!item.path) return false;
+    return currentPath === item.path;
+  };
+
   return (
     <>
       <nav
@@ -82,7 +87,7 @@ export default function ReelBottomTabNav() {
         <div className="reel-bottom-nav-container">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const active = isActive(item);
 
             return (
               <Button
@@ -91,13 +96,13 @@ export default function ReelBottomTabNav() {
                 size="sm"
                 onClick={() => handleNavClick(item)}
                 onKeyDown={(e) => handleKeyDown(e, item)}
-                className={`reel-bottom-nav-item ${isActive ? 'reel-bottom-nav-item-active' : ''}`}
+                className={`reel-bottom-nav-item ${active ? 'reel-bottom-nav-item-active' : ''}`}
                 aria-label={item.label}
-                aria-current={isActive ? 'page' : undefined}
+                aria-current={active ? 'page' : undefined}
               >
                 <div className="flex flex-col items-center gap-1">
-                  <Icon className={`h-6 w-6 transition-colors ${isActive ? 'text-primary' : 'text-white/80'}`} />
-                  <span className={`text-xs font-medium transition-colors ${isActive ? 'text-primary' : 'text-white/80'}`}>
+                  <Icon className={`h-6 w-6 transition-colors ${active ? 'text-primary' : 'text-white/80'}`} />
+                  <span className={`text-xs font-medium transition-colors ${active ? 'text-primary' : 'text-white/80'}`}>
                     {item.label}
                   </span>
                 </div>

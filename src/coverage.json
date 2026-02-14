@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T19:19:34.625Z",
+  "generatedAt": "2026-02-14T17:48:18.000Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,58 +12,57 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Remove the wheel-based navigation mechanic from the app, including its UI, hooks, and styling, so no wheel navigation is rendered or referenced anywhere in the reel experience.",
+        "summary": "Restore the previous primary navigation layout with the main icons fixed at the bottom of the screen (bottom tab navigation), replacing the current updated/high-tech icon navigation experience.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/WheelNavScroller.tsx",
-          "frontend/src/hooks/useWheelScroller.ts",
-          "frontend/src/components/ReelHome.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/ReelBottomTabNav.tsx",
           "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/WheelNavScroller.tsx",
-          "frontend/src/hooks/useWheelScroller.ts",
-          "frontend/src/components/ReelHome.tsx",
-          "frontend/src/index.css"
+          "frontend/src/App.tsx",
+          "frontend/src/components/ReelBottomTabNav.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement a new simple, popular-feeling navigation mechanic (not a wheel) that is consistently available in the reel-first experience and is easy to use on mobile and desktop.",
+        "summary": "Restore the Profile page experience from the prior version so the Profile route (/profile) works correctly and presents the expected profile content and actions (view/edit profile, posts, followers/following, notifications, etc.).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ReelBottomTabNav.tsx",
-          "frontend/src/components/ReelHome.tsx"
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/ReelBottomTabNav.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ReelBottomTabNav.tsx",
-          "frontend/src/components/ReelHome.tsx"
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/ReelBottomTabNav.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Update the reel page and any related layout logic so the new navigation mechanic replaces the wheel without introducing duplicate/confusing navigation patterns.",
+        "summary": "Restore the Deeds battery usage feature so users can see the DeedsBar battery-style session timer and daily usage limit UI as part of the user experience (as it was in the old version).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ReelHome.tsx",
-          "frontend/src/components/ReelBottomTabNav.tsx"
+          "frontend/src/hooks/useDeedsUsage.ts",
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/DeedsBar.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ReelHome.tsx",
-          "frontend/src/components/ReelBottomTabNav.tsx"
+          "frontend/src/hooks/useDeedsUsage.ts",
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/DeedsBar.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Apply a coherent, distinct visual theme across the new navigation and reel experience that feels modern and addictive while staying simple (avoid blue/purple as the primary identity unless already present).",
+        "summary": "Restore the Deeds report card feature (“Grade Deeds Report Card”) so it is accessible again as part of the app experience (as it was in the old version).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/ReelBottomTabNav.tsx"
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/GradeDeedsRating.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/ReelBottomTabNav.tsx"
+          "frontend/src/components/Profile.tsx",
+          "frontend/src/components/GradeDeedsRating.tsx"
         ]
       }
     ]
@@ -73,11 +72,12 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/DeedsBar.tsx",
+    "frontend/src/components/GradeDeedsRating.tsx",
+    "frontend/src/components/Profile.tsx",
     "frontend/src/components/ReelBottomTabNav.tsx",
-    "frontend/src/components/ReelHome.tsx",
-    "frontend/src/components/WheelNavScroller.tsx",
-    "frontend/src/hooks/useWheelScroller.ts",
-    "frontend/src/index.css",
+    "frontend/src/hooks/useDeedsUsage.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

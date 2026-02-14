@@ -1,101 +1,101 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Replace wheel navigation with a simple, accessible reel bottom navigation",
+  "title": "Revert to classic bottom navigation and restore Profile + Deeds UI",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Remove wheel navigation UI, hook usage, and wheel-specific styling so nothing wheel-related renders or intercepts scrolling in the reel experience.",
+      "summary": "Restore classic fixed bottom tab navigation with the primary app destinations and Create Post modal trigger.",
       "acceptanceCriteria": [
-        "WheelNavScroller is no longer imported or rendered (including on the ReelHome page and empty-feed state).",
-        "The wheel-scroller hook is no longer used anywhere in the app.",
-        "Wheel-specific CSS utilities/classes are removed or no longer referenced so they do not affect layout/behavior.",
-        "The reel feed scroll behavior is not blocked by any remaining wheel event listeners."
+        "On mobile and desktop widths, a fixed bottom navigation bar is visible with the main navigation icons.",
+        "Bottom navigation includes clear access to: Home, Discover, Create, Messages, Profile, and Hub.",
+        "Bottom navigation does not visually conflict with page content (main content has adequate bottom padding so it is not obscured).",
+        "Navigation works via click/tap and uses the existing router paths (/, /discover, /messages, /profile, /hub) and opens the existing Create Post modal from the Create button."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/WheelNavScroller.tsx",
-          "operation": "delete",
-          "description": "Remove the WheelNavScroller component implementation so it can no longer be imported or rendered anywhere."
-        },
-        {
-          "path": "frontend/src/hooks/useWheelScroller.ts",
-          "operation": "delete",
-          "description": "Remove the wheel-scroller hook to eliminate wheel event listeners and selection logic tied to the wheel navigation mechanic."
-        },
-        {
-          "path": "frontend/src/components/ReelHome.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Remove WheelNavScroller import and usages in both the empty-feed state and the main reel feed, ensuring no wheel navigation is rendered or referenced."
+          "description": "Wire the bottom tab navigation into the shared app layout so it is fixed to the bottom across routes, and adjust the main content container to include adequate bottom padding to prevent content from being obscured."
+        },
+        {
+          "path": "frontend/src/components/ReelBottomTabNav.tsx",
+          "operation": "modify",
+          "description": "Update the bottom tab navigation to derive its active state from the current router location (instead of local-only state) while preserving the existing Create Post modal trigger behavior."
         },
         {
           "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Remove wheel navigation utility/classes (e.g., wheel-nav-container, wheel-nav-item, wheel-nav-item-selected) so wheel styling no longer affects layout/behavior."
+          "description": "Ensure global styles support a fixed bottom navigation (e.g., consistent height, safe-area handling, and a reusable bottom padding utility/class that matches the nav height)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add a simple, popular-feeling bottom tab navigation on the reel route with accessible controls and Create Post integration.",
+      "summary": "Ensure the /profile route renders the expected profile experience and key actions without runtime errors and with bottom-nav active state.",
       "acceptanceCriteria": [
-        "A replacement navigation UI is available on the main reel route ('/'), providing one-tap access to core sections (Home/Reel, Discover, Create Post, Messages, Profile, Hub).",
-        "Navigation supports mouse/touch and keyboard accessibility (tab focus + Enter/Space activation) with clear English labels/aria-labels.",
-        "Create Post opens the existing create-post flow/modal (no broken navigation or dead buttons).",
-        "The new navigation does not interfere with vertical scroll-snap usage on the reel feed."
+        "Visiting /profile renders the Profile page without runtime errors.",
+        "Profile page supports the existing key sections/actions already present in the app (profile header, edit actions, followers/following modals, notifications panel, and user posts list) and they are reachable in the UI.",
+        "Bottom navigation can navigate to /profile and shows the Profile tab as active when on /profile."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ReelBottomTabNav.tsx",
-          "operation": "create",
-          "description": "Create a new simple bottom tab navigation component for the reel-first experience (not a wheel). Use existing shadcn/ui components by composing (e.g., Button, dialog/modal triggers) and lucide icons; include clear English labels and aria-labels, keyboard activation (Enter/Space), and a Create Post trigger that opens the existing CreatePostModal. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/Profile.tsx",
+          "operation": "modify",
+          "description": "Restore/confirm the Profile page composition so the existing profile header/edit controls, followers/following modals, notifications panel, and posts list are reachable and stable; ensure it integrates cleanly with the restored bottom navigation without layout overlap."
         },
         {
-          "path": "frontend/src/components/ReelHome.tsx",
+          "path": "frontend/src/components/ReelBottomTabNav.tsx",
           "operation": "modify",
-          "description": "Wire the new ReelBottomTabNav into the reel route so it is consistently available on '/'. Ensure it is positioned in a fixed, non-scroll-blocking way that does not interfere with the reel vertical scroll-snap."
+          "description": "Ensure the Profile tab correctly renders as active when the current route is /profile (route-aware active state)."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Update the reel page layout to use only the new navigation component (no wheel/duplicate patterns) and ensure all targets route correctly.",
+      "summary": "Restore the DeedsBar battery-style session timer and daily usage UI with real-time updates and per-day local persistence.",
       "acceptanceCriteria": [
-        "ReelHome uses the new navigation component instead of WheelNavScroller (including the empty-feed state).",
-        "The navigation appears in a single, consistent place on the reel route (no duplicated wheel + bottom nav combinations).",
-        "All navigation targets route correctly using the existing router paths ('/', '/discover', '/messages', '/profile', '/hub')."
+        "A DeedsBar battery-style UI is visible to the user (at minimum on the Profile page) showing session time and a battery percentage indicator.",
+        "Session timer updates in real time while the app is open.",
+        "Daily usage value is not hard-coded to 0; it is tracked client-side (e.g., persisted per-day locally) so it can increase across a day and reset on a new day.",
+        "Battery icon assets referenced by DeedsBar resolve correctly (no broken images)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ReelHome.tsx",
-          "operation": "modify",
-          "description": "Ensure ReelHome renders exactly one navigation pattern on the reel route by using the new ReelBottomTabNav in both loaded and empty states, and removing any remaining wheel/bottom-nav duplication."
+          "path": "frontend/src/hooks/useDeedsUsage.ts",
+          "operation": "create",
+          "description": "Implement a client-side usage tracking hook that provides real-time session duration and a per-day persisted daily usage counter (e.g., via localStorage keyed by date), including automatic reset on day rollover."
         },
         {
-          "path": "frontend/src/components/ReelBottomTabNav.tsx",
+          "path": "frontend/src/components/Profile.tsx",
           "operation": "modify",
-          "description": "Implement navigation actions using the existing TanStack Router paths ('/', '/discover', '/messages', '/profile', '/hub') and keep Create Post opening the existing CreatePostModal. Verify the component's usage instructions before implementing."
+          "description": "Replace the hard-coded daily usage value and the current Deeds bar wiring with the restored battery-style DeedsBar fed by the new client-side usage tracking hook, so session and daily usage update in real time."
+        },
+        {
+          "path": "frontend/src/components/DeedsBar.tsx",
+          "operation": "modify",
+          "description": "Harden DeedsBar asset rendering so battery/timer icons resolve reliably (e.g., use the existing SafeImageIcon fallback where appropriate and ensure paths align with assets under frontend/public/assets/generated), while keeping the battery-style UI and timers."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Apply a coherent modern theme to the new navigation and reel experience with clear active states and English UI text (avoid blue/purple as primary identity).",
+      "summary": "Restore the Grade Deeds Report Card UI so it renders and its Rate Friend modal works and is dismissible.",
       "acceptanceCriteria": [
-        "The navigation component has a consistent visual style (colors, typography, spacing, states) that matches the rest of the app.",
-        "Active/selected state is clearly visible and accessible (sufficient contrast, not color-only).",
-        "User-facing text in the new UI is in English."
+        "The “Grade Deeds Report Card” UI renders (at minimum on the Profile page) without runtime errors.",
+        "The report card shows the core metric sections and overall grade as visible UI content.",
+        "If the UI includes a “Rate Friend” action, it opens a modal/dialog successfully and can be dismissed."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/Profile.tsx",
           "operation": "modify",
-          "description": "Add/adjust lightweight utility classes for the new bottom navigation (container background, blur, borders, safe-area padding, focus-visible ring, and an active state that is not color-only, e.g., shape/underline). Ensure the style aligns with the existing red-forward primary tokens and avoids blue/purple as the primary identity."
+          "description": "Ensure GradeDeedsRating is rendered as part of the Profile experience (at minimum on /profile) with valid props, and that the entry point is visible and reachable within the page layout."
         },
         {
-          "path": "frontend/src/components/ReelBottomTabNav.tsx",
+          "path": "frontend/src/components/GradeDeedsRating.tsx",
           "operation": "modify",
-          "description": "Apply the updated theme styling classes and ensure active state is both visually distinct and accessible (contrast + non-color cue), while keeping all user-facing labels in English. Verify the component's usage instructions before implementing."
+          "description": "Stabilize the Report Card modal open/close flow (Rate Friend action + dismiss) and ensure it renders without runtime errors using existing composed UI components (do not edit files under frontend/src/components/ui; compose them instead)."
         }
       ]
     }
