@@ -10,7 +10,34 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface ChallengeCompletion {
+  'id' : string,
+  'user' : Principal,
+  'challengeId' : string,
+  'timestamp' : Time,
+  'postId' : string,
+}
+export interface DailyChallenge {
+  'id' : string,
+  'date' : Time,
+  'category' : PostCategory,
+  'prompt' : string,
+}
 export type ExternalBlob = Uint8Array;
+export interface KindnessMatch {
+  'sharedCategories' : Array<PostCategory>,
+  'withUser' : Principal,
+  'compatibilityScore' : bigint,
+  'reason' : string,
+}
+export interface LoveNote {
+  'id' : string,
+  'recipient' : Principal,
+  'sender' : Principal,
+  'message' : string,
+  'timestamp' : Time,
+}
+export interface MemoryJarEntry { 'savedAt' : Time, 'postId' : string }
 export interface MusicAttachment {
   'id' : string,
   'title' : string,
@@ -22,6 +49,23 @@ export interface PhotoAlbumView {
   'name' : string,
   'photos' : Array<ExternalBlob>,
 }
+export interface Post {
+  'id' : string,
+  'parentPostId' : [] | [string],
+  'video' : [] | [ExternalBlob],
+  'author' : Principal,
+  'likes' : bigint,
+  'timestamp' : Time,
+  'caption' : string,
+  'category' : PostCategory,
+  'comments' : bigint,
+  'photo' : [] | [ExternalBlob],
+  'isFlagged' : boolean,
+}
+export type PostCategory = { 'other' : null } |
+  { 'actsOfKindness' : null } |
+  { 'environmental' : null } |
+  { 'communityService' : null };
 export interface StatusUpdate {
   'music' : [] | [MusicAttachment],
   'text' : [] | [string],
@@ -80,30 +124,54 @@ export interface _SERVICE {
     [[] | [string], [] | [ExternalBlob], [] | [MusicAttachment]],
     undefined
   >,
+  'addToMemoryJar' : ActorMethod<[string], boolean>,
   'addVideoToAlbum' : ActorMethod<[string, ExternalBlob], boolean>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'attachMusicToStatus' : ActorMethod<
     [string, string, string, ExternalBlob],
     undefined
   >,
+  'completeDailyChallenge' : ActorMethod<[string, string], ChallengeCompletion>,
   'createPhotoAlbum' : ActorMethod<[string, string], undefined>,
+  'createPost' : ActorMethod<
+    [
+      string,
+      string,
+      [] | [string],
+      [] | [ExternalBlob],
+      [] | [ExternalBlob],
+      PostCategory,
+    ],
+    Post
+  >,
   'createVideoAlbum' : ActorMethod<[string, string], undefined>,
   'getAllMusicAttachments' : ActorMethod<[], Array<MusicAttachment>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getChallengeCompletions' : ActorMethod<[string], Array<ChallengeCompletion>>,
   'getFriendsStatusUpdates' : ActorMethod<
     [Array<Principal>],
     Array<StatusUpdate>
   >,
+  'getLoveNotesCount' : ActorMethod<[], bigint>,
   'getMusicAttachment' : ActorMethod<[string], [] | [MusicAttachment]>,
+  'getMyLoveNotes' : ActorMethod<[], Array<LoveNote>>,
+  'getMyMemoryJar' : ActorMethod<[], Array<MemoryJarEntry>>,
   'getMyPhotoAlbums' : ActorMethod<[], Array<PhotoAlbumView>>,
   'getMyVideoAlbums' : ActorMethod<[], Array<VideoAlbumView>>,
+  'getRippleChain' : ActorMethod<[string], Array<Post>>,
+  'getTodaysChallenge' : ActorMethod<[], [] | [DailyChallenge]>,
+  'getTopMatches' : ActorMethod<[Principal], Array<KindnessMatch>>,
   'getUserAlbums' : ActorMethod<
     [Principal],
     {
       'photoAlbums' : Array<PhotoAlbumView>,
       'videoAlbums' : Array<VideoAlbumView>,
     }
+  >,
+  'getUserChallengeCompletions' : ActorMethod<
+    [Principal],
+    Array<ChallengeCompletion>
   >,
   'getUserPhotoAlbums' : ActorMethod<[Principal], Array<PhotoAlbumView>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
@@ -116,8 +184,18 @@ export interface _SERVICE {
   >,
   'initializeAccessControl' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'removeFromMemoryJar' : ActorMethod<[string], boolean>,
   'removeMusicAttachment' : ActorMethod<[string], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'sendLoveNote' : ActorMethod<[string, Principal, string], string>,
+  'setDailyChallenge' : ActorMethod<
+    [string, string, PostCategory, Time],
+    DailyChallenge
+  >,
+  'storeKindnessMatches' : ActorMethod<
+    [Principal, Array<KindnessMatch>],
+    undefined
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -1,57 +1,241 @@
 {
   "kind": "build_request",
-  "title": "Revert logo to saved Deeds logo in Header and LoginPrompt",
+  "title": "Add Ripple Effect Stories, Love Notes, Deed of the Day, Kindness Matches & Memory Jars",
   "projectName": "Deeds",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "In the Header component (frontend/src/components/Header.tsx), replace the current logo image rendered inside the header button (XPath: /html[1]/body[1]/div[1]/div[1]/header[1]/div[1]/button[1]/img[1]) with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'.",
-      "target": "frontend",
+      "text": "Add backend support for Ripple Effect Stories: allow a post to optionally reference a parent post ID as its 'inspiration source', store a ripple chain map (parentPostId → [childPostIds]), and expose query functions to fetch the full ripple chain for any given post.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "go back to the logo i told you to save for me"
+          "chain of kindness linking inspired deeds back to originating deed"
         ]
       },
       "acceptanceCriteria": [
-        "The header logo img src is set to '/assets/generated/deeds-logo.png'",
-        "The original Deeds logo is visible in the top navigation header",
-        "No broken image or placeholder is displayed in the header"
+        "Posts can be created with an optional inspirationSource post ID",
+        "A ripple chain query returns all deeds linked back to an originating post in order",
+        "Chain depth of at least 5 levels is supported"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "In the main page/hero section (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/img[1]), replace the current logo image with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'. This likely corresponds to the Gate or LoginPrompt component hero logo.",
+      "text": "Build a Ripple Effect Stories UI: on each PostCard, show a 'This inspired me' button that opens a ripple post creation modal pre-linked to the parent deed. Display the ripple chain as a visual tree/timeline beneath the original post, showing how kindness spread from one deed to many.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "go back to the logo i told you to save for me"
+          "creating a visible chain of kindness",
+          "People love seeing the impact they started"
         ]
       },
       "acceptanceCriteria": [
-        "The main/hero section logo img src is set to '/assets/generated/deeds-logo.png'",
-        "The original Deeds logo is visible in the hero/main area of the page",
-        "No broken image or placeholder is displayed in the main content logo area"
+        "Each post card shows a 'This inspired me ✨' button",
+        "Tapping it opens a create-post modal with the parent deed linked",
+        "Ripple chain view shows the originating deed and all descendant deeds in a tree or timeline layout",
+        "Chain displays author avatars, captions, and timestamps"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add backend support for Love Notes to Strangers: store anonymous positivity notes with a message body (max 280 chars), a timestamp, and a recipient principal chosen randomly from active users. Expose functions to send a note and fetch notes addressed to the calling user.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "anonymous positivity board where users can send short, uplifting messages to random people"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A note is stored with anonymous sender, random recipient, message, and timestamp",
+        "Users can retrieve all notes sent to them",
+        "Sender identity is never exposed in any query result"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Build a Love Notes to Strangers page accessible from the main navigation: show a warm, romantic card UI where authenticated users can type and send an anonymous note. Display received notes in a scrollable inbox styled like sealed letter envelopes that open on click, revealing the message with a soft animation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "giving and receiving warmth without pressure",
+          "Perfect for romantics and lonely hearts"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigation includes a 'Love Notes' link",
+        "Send form has a 280-character textarea and a 'Send to a Stranger 💌' button",
+        "Received notes appear as envelope cards; clicking one animates it open to reveal the message",
+        "Sender is shown only as 'A Kind Stranger'",
+        "Empty state shows an encouraging message when no notes have been received"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add backend support for Deed of the Day Challenges: store a single daily challenge prompt (text, date, category) set by admins or auto-rotated from a curated list. Store user challenge completions linking a user principal, date, and their completion post ID. Expose query functions to get today's challenge and all completions for it.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "A daily prompt the whole community does together"
+        ]
+      },
+      "acceptanceCriteria": [
+        "One active challenge prompt exists per calendar day",
+        "Users can mark a challenge as completed by linking a post",
+        "Query returns today's challenge and a list of all completions with user info"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Build a Deed of the Day Challenge page: display today's challenge prompt in a large, celebratory hero card with a countdown to the next day's challenge. Show a 'Accept & Complete' button that opens the post creation modal pre-filled with the challenge context. Below the hero, render a live community wall of everyone who has completed today's challenge with their deed posts, participant count, and a progress ring.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Creates shared moments and conversation — the antidote to loneliness"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Hero card shows today's challenge text, category, and a live countdown timer to midnight",
+        "Participant count and progress ring update in real time via React Query polling",
+        "Community wall shows completion posts with author avatars and captions",
+        "Completed users see a 'You did it today! 🌟' badge instead of the accept button"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add backend support for Kindness Matches: compute compatibility scores between users based on overlapping deed categories in their posts. Store match pairs with a score and a 'reason' text (e.g., 'You both love helping neighbours'). Expose a query for a user to retrieve their top 5 Kindness Matches.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "algorithm that pairs two users who have done similar deeds",
+          "friendship matchmaker based on character, not looks"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Match scores are computed from shared post categories between two users",
+        "Each match record includes a human-readable reason string",
+        "Top 5 matches are returned sorted by score descending",
+        "A user is never matched with themselves"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Build a Kindness Matches page: display the current user's top 5 matched users as profile cards with a compatibility percentage, shared deed categories, and the reason they were matched. Include a 'Say Hello 👋' button on each card that initiates a message to that user. Style the page with a warm, heart-themed romantic aesthetic.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "You two might get along",
+          "like a friendship matchmaker based on character, not looks"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Page shows up to 5 match cards with avatar, name, compatibility percentage, shared categories, and match reason",
+        "'Say Hello 👋' button opens the Messages component pre-addressed to that user",
+        "Cards animate in with a gentle fade/slide entrance",
+        "Empty state encourages the user to post more deeds to find matches"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Add backend support for Memory Jars: allow users to save any post into their personal Memory Jar collection, store saved post references (postId, savedAt timestamp) per user, and expose query functions to add/remove a post from a jar and to fetch all jar contents for the calling user.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Users collect their favorite deeds from others into a personal jar they can revisit anytime",
+          "like a scrapbook of human goodness"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can save and unsave any post to their Memory Jar",
+        "Jar contents are returned with full post data sorted by savedAt descending",
+        "Duplicate saves are idempotent (no duplicates stored)"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Build a Memory Jar UI: add a mason-jar bookmark icon to every PostCard that fills/animates when a post is saved. Create a dedicated Memory Jar profile section (accessible from the Profile page) displaying all saved posts in a cozy scrapbook grid layout with a vintage paper/warmth aesthetic. Show a count badge on the jar icon in the profile nav.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "comforts them on hard days",
+          "personal jar they can revisit anytime"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Every post card has a jar/bookmark icon that toggles saved state with a fill animation",
+        "Memory Jar tab on the Profile page displays all saved posts in a warm scrapbook grid",
+        "Jar count badge on the profile nav updates reactively",
+        "Empty jar state shows an illustrated message inviting users to save their first deed",
+        "Removing a post from the jar is supported via an unsave button on the scrapbook cards"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Update the main navigation (Header component) to include links to all five new features: Love Notes, Deed of the Day, Kindness Matches, and Memory Jar (Memory Jar also accessible from Profile). Ensure all new pages are registered as routes in App.tsx.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Build all of them into deeds right now"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Header dropdown or nav bar includes links to Love Notes, Deed of the Day, and Kindness Matches",
+        "All new pages resolve correctly via the router without 404s",
+        "Active route is visually highlighted in the nav"
       ]
     }
   ],
   "constraints": [
-    "Do not modify any other images or assets beyond the two logo img elements identified by the provided XPaths",
-    "Use only the existing saved logo asset at '/assets/generated/deeds-logo.png' — do not generate a new logo image"
+    "All Motoko logic must remain in the single backend/main.mo actor file",
+    "Do not edit any file listed in frontend.immutablePaths",
+    "Sender identity must never be exposed in Love Notes queries — anonymity is a hard requirement"
   ],
   "nonGoals": [
-    "Redesigning the logo or creating a new logo image",
-    "Changing any other UI elements beyond the two logo images",
-    "Modifying backend logic"
+    "Real-time WebSocket-based live updates (polling via React Query is acceptable)",
+    "AI or ML-based matching algorithms — category overlap scoring is sufficient",
+    "Admin UI for managing Deed of the Day prompts in this iteration",
+    "Email or push notifications for new Love Notes or Kindness Matches"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Warm glowing mason jar illustration with golden light and small floating hearts, for Memory Jar feature (memory-jar-icon.dim_256x256.png)",
+      "Sealed wax-stamped envelope with a small heart, soft warm tones, for Love Notes feature (love-note-envelope.dim_256x256.png)",
+      "Ripple of golden rings on a calm water surface symbolising chain of kindness, for Ripple Effect Stories (ripple-effect-hero.dim_800x400.png)",
+      "Two hands reaching toward each other with soft pastel glow, for Kindness Matches feature (kindness-match-hero.dim_800x400.png)",
+      "Sun rising over a community of silhouettes holding hands, warm coral and gold tones, for Deed of the Day (deed-of-the-day-hero.dim_800x400.png)"
+    ],
     "edits": []
   }
 }

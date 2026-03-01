@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { Principal } from '@icp-sdk/core/principal';
-import type { UserProfile, PhotoAlbumView, VideoAlbumView, MusicAttachment, StatusUpdate } from '../backend';
+import type { UserProfile, PhotoAlbumView, VideoAlbumView, MusicAttachment, StatusUpdate, LoveNote, DailyChallenge, ChallengeCompletion, KindnessMatch, MemoryJarEntry } from '../backend';
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -129,6 +129,7 @@ export interface Post {
   id: string;
   author: Principal;
   caption: string;
+  parentPostId?: string;
   photo: any;
   video: any;
   category: PostCategory;
@@ -232,14 +233,26 @@ export function useGetAllPosts() {
 }
 
 export function useCreatePost() {
+  const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (post: Partial<Post>) => {
-      return Promise.resolve();
+    mutationFn: async (post: { caption: string; parentPostId?: string; photo?: any; video?: any; category: PostCategory }) => {
+      if (!actor) throw new Error('Actor not available');
+      const id = `post-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const categoryStr = post.category.__kind__ as any;
+      return actor.createPost(
+        id,
+        post.caption,
+        post.parentPostId ?? null,
+        post.photo ?? null,
+        post.video ?? null,
+        categoryStr
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['rippleChain'] });
     },
   });
 }
@@ -248,7 +261,7 @@ export function useLikePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (postId: string) => {
+    mutationFn: async (_postId: string) => {
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -277,7 +290,7 @@ export function useCreateBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (blog: Partial<Blog>) => {
+    mutationFn: async (_blog: Partial<Blog>) => {
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -286,9 +299,9 @@ export function useCreateBlog() {
   });
 }
 
-export function useSearchBlogs(query: string) {
+export function useSearchBlogs(_query: string) {
   return useQuery<Blog[]>({
-    queryKey: ['searchBlogs', query],
+    queryKey: ['searchBlogs', _query],
     queryFn: async () => [],
     enabled: false,
   });
@@ -322,7 +335,7 @@ export function useMarkNotificationRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (notificationId: string) => {
+    mutationFn: async (_notificationId: string) => {
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -335,7 +348,7 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (message: Partial<Message>) => {
+    mutationFn: async (_message: Partial<Message>) => {
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -356,7 +369,7 @@ export function useCreateLiveSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (session: Partial<LiveSession>) => {
+    mutationFn: async (_session: Partial<LiveSession>) => {
       return Promise.resolve({ id: 'session-1', streamId: 'stream-1' });
     },
     onSuccess: () => {
@@ -369,7 +382,7 @@ export function useEndLiveSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (sessionId: string) => {
+    mutationFn: async (_sessionId: string) => {
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -411,11 +424,192 @@ export function useCreateMarketplacePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (post: Partial<MarketplacePost>) => {
+    mutationFn: async (_post: Partial<MarketplacePost>) => {
       return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['marketplacePosts'] });
+    },
+  });
+}
+
+// ── Ripple Effect Stories ─────────────────────────────────────────────────────
+
+export function useGetRippleChain(postId: string | null) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Post[]>({
+    queryKey: ['rippleChain', postId],
+    queryFn: async () => {
+      if (!actor || !postId) return [];
+      // Cast via unknown to bridge the backend PostCategory enum vs local discriminated union
+      const result = await actor.getRippleChain(postId);
+      return result as unknown as Post[];
+    },
+    enabled: !!actor && !isFetching && !!postId,
+  });
+}
+
+// ── Love Notes ────────────────────────────────────────────────────────────────
+
+export function useSendLoveNote() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ recipient, message }: { recipient: Principal; message: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      const id = `note-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      return actor.sendLoveNote(id, recipient, message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myLoveNotes'] });
+      queryClient.invalidateQueries({ queryKey: ['loveNotesCount'] });
+    },
+  });
+}
+
+export function useGetMyLoveNotes() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<LoveNote[]>({
+    queryKey: ['myLoveNotes'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getMyLoveNotes();
+    },
+    enabled: !!actor && !isFetching,
+    refetchInterval: 30000,
+  });
+}
+
+export function useGetLoveNotesCount() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<bigint>({
+    queryKey: ['loveNotesCount'],
+    queryFn: async () => {
+      if (!actor) return BigInt(0);
+      return actor.getLoveNotesCount();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ── Deed of the Day ───────────────────────────────────────────────────────────
+
+export function useGetTodaysChallenge() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<DailyChallenge | null>({
+    queryKey: ['todaysChallenge'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getTodaysChallenge();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetChallengeCompletions(challengeId: string | null) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<ChallengeCompletion[]>({
+    queryKey: ['challengeCompletions', challengeId],
+    queryFn: async () => {
+      if (!actor || !challengeId) return [];
+      return actor.getChallengeCompletions(challengeId);
+    },
+    enabled: !!actor && !isFetching && !!challengeId,
+    refetchInterval: 10000,
+  });
+}
+
+export function useGetUserChallengeCompletions(userPrincipal: Principal | null) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<ChallengeCompletion[]>({
+    queryKey: ['userChallengeCompletions', userPrincipal?.toString()],
+    queryFn: async () => {
+      if (!actor || !userPrincipal) return [];
+      return actor.getUserChallengeCompletions(userPrincipal);
+    },
+    enabled: !!actor && !isFetching && !!userPrincipal,
+  });
+}
+
+export function useCompleteDailyChallenge() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ challengeId, postId }: { challengeId: string; postId: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.completeDailyChallenge(challengeId, postId);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['challengeCompletions', variables.challengeId] });
+      queryClient.invalidateQueries({ queryKey: ['userChallengeCompletions'] });
+    },
+  });
+}
+
+// ── Kindness Matches ──────────────────────────────────────────────────────────
+
+export function useGetTopMatches(userPrincipal: Principal | null) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<KindnessMatch[]>({
+    queryKey: ['topMatches', userPrincipal?.toString()],
+    queryFn: async () => {
+      if (!actor || !userPrincipal) return [];
+      return actor.getTopMatches(userPrincipal);
+    },
+    enabled: !!actor && !isFetching && !!userPrincipal,
+  });
+}
+
+// ── Memory Jar ────────────────────────────────────────────────────────────────
+
+export function useGetMyMemoryJar() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<MemoryJarEntry[]>({
+    queryKey: ['myMemoryJar'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getMyMemoryJar();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAddToMemoryJar() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.addToMemoryJar(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myMemoryJar'] });
+    },
+  });
+}
+
+export function useRemoveFromMemoryJar() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.removeFromMemoryJar(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myMemoryJar'] });
     },
   });
 }

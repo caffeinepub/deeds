@@ -31,6 +31,33 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const Time = IDL.Int;
+export const ChallengeCompletion = IDL.Record({
+  'id' : IDL.Text,
+  'user' : IDL.Principal,
+  'challengeId' : IDL.Text,
+  'timestamp' : Time,
+  'postId' : IDL.Text,
+});
+export const PostCategory = IDL.Variant({
+  'other' : IDL.Null,
+  'actsOfKindness' : IDL.Null,
+  'environmental' : IDL.Null,
+  'communityService' : IDL.Null,
+});
+export const Post = IDL.Record({
+  'id' : IDL.Text,
+  'parentPostId' : IDL.Opt(IDL.Text),
+  'video' : IDL.Opt(ExternalBlob),
+  'author' : IDL.Principal,
+  'likes' : IDL.Nat,
+  'timestamp' : Time,
+  'caption' : IDL.Text,
+  'category' : PostCategory,
+  'comments' : IDL.Nat,
+  'photo' : IDL.Opt(ExternalBlob),
+  'isFlagged' : IDL.Bool,
+});
 export const UserProfile = IDL.Record({
   'bio' : IDL.Text,
   'principal' : IDL.Principal,
@@ -42,12 +69,22 @@ export const UserProfile = IDL.Record({
   'following' : IDL.Nat,
   'profilePicture' : IDL.Opt(ExternalBlob),
 });
-export const Time = IDL.Int;
 export const StatusUpdate = IDL.Record({
   'music' : IDL.Opt(MusicAttachment),
   'text' : IDL.Opt(IDL.Text),
   'timestamp' : Time,
   'image' : IDL.Opt(ExternalBlob),
+});
+export const LoveNote = IDL.Record({
+  'id' : IDL.Text,
+  'recipient' : IDL.Principal,
+  'sender' : IDL.Principal,
+  'message' : IDL.Text,
+  'timestamp' : Time,
+});
+export const MemoryJarEntry = IDL.Record({
+  'savedAt' : Time,
+  'postId' : IDL.Text,
 });
 export const PhotoAlbumView = IDL.Record({
   'id' : IDL.Text,
@@ -58,6 +95,18 @@ export const VideoAlbumView = IDL.Record({
   'id' : IDL.Text,
   'name' : IDL.Text,
   'videos' : IDL.Vec(ExternalBlob),
+});
+export const DailyChallenge = IDL.Record({
+  'id' : IDL.Text,
+  'date' : Time,
+  'category' : PostCategory,
+  'prompt' : IDL.Text,
+});
+export const KindnessMatch = IDL.Record({
+  'sharedCategories' : IDL.Vec(PostCategory),
+  'withUser' : IDL.Principal,
+  'compatibilityScore' : IDL.Nat,
+  'reason' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
@@ -93,6 +142,7 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
+  'addToMemoryJar' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'addVideoToAlbum' : IDL.Func([IDL.Text, ExternalBlob], [IDL.Bool], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'attachMusicToStatus' : IDL.Func(
@@ -100,7 +150,24 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
+  'completeDailyChallenge' : IDL.Func(
+      [IDL.Text, IDL.Text],
+      [ChallengeCompletion],
+      [],
+    ),
   'createPhotoAlbum' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'createPost' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Opt(IDL.Text),
+        IDL.Opt(ExternalBlob),
+        IDL.Opt(ExternalBlob),
+        PostCategory,
+      ],
+      [Post],
+      [],
+    ),
   'createVideoAlbum' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'getAllMusicAttachments' : IDL.Func(
       [],
@@ -109,18 +176,33 @@ export const idlService = IDL.Service({
     ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getChallengeCompletions' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(ChallengeCompletion)],
+      ['query'],
+    ),
   'getFriendsStatusUpdates' : IDL.Func(
       [IDL.Vec(IDL.Principal)],
       [IDL.Vec(StatusUpdate)],
       ['query'],
     ),
+  'getLoveNotesCount' : IDL.Func([], [IDL.Nat], ['query']),
   'getMusicAttachment' : IDL.Func(
       [IDL.Text],
       [IDL.Opt(MusicAttachment)],
       ['query'],
     ),
+  'getMyLoveNotes' : IDL.Func([], [IDL.Vec(LoveNote)], ['query']),
+  'getMyMemoryJar' : IDL.Func([], [IDL.Vec(MemoryJarEntry)], ['query']),
   'getMyPhotoAlbums' : IDL.Func([], [IDL.Vec(PhotoAlbumView)], ['query']),
   'getMyVideoAlbums' : IDL.Func([], [IDL.Vec(VideoAlbumView)], ['query']),
+  'getRippleChain' : IDL.Func([IDL.Text], [IDL.Vec(Post)], ['query']),
+  'getTodaysChallenge' : IDL.Func([], [IDL.Opt(DailyChallenge)], ['query']),
+  'getTopMatches' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(KindnessMatch)],
+      ['query'],
+    ),
   'getUserAlbums' : IDL.Func(
       [IDL.Principal],
       [
@@ -129,6 +211,11 @@ export const idlService = IDL.Service({
           'videoAlbums' : IDL.Vec(VideoAlbumView),
         }),
       ],
+      ['query'],
+    ),
+  'getUserChallengeCompletions' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(ChallengeCompletion)],
       ['query'],
     ),
   'getUserPhotoAlbums' : IDL.Func(
@@ -169,8 +256,24 @@ export const idlService = IDL.Service({
     ),
   'initializeAccessControl' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'removeFromMemoryJar' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'removeMusicAttachment' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'sendLoveNote' : IDL.Func(
+      [IDL.Text, IDL.Principal, IDL.Text],
+      [IDL.Text],
+      [],
+    ),
+  'setDailyChallenge' : IDL.Func(
+      [IDL.Text, IDL.Text, PostCategory, Time],
+      [DailyChallenge],
+      [],
+    ),
+  'storeKindnessMatches' : IDL.Func(
+      [IDL.Principal, IDL.Vec(KindnessMatch)],
+      [],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -199,6 +302,33 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const Time = IDL.Int;
+  const ChallengeCompletion = IDL.Record({
+    'id' : IDL.Text,
+    'user' : IDL.Principal,
+    'challengeId' : IDL.Text,
+    'timestamp' : Time,
+    'postId' : IDL.Text,
+  });
+  const PostCategory = IDL.Variant({
+    'other' : IDL.Null,
+    'actsOfKindness' : IDL.Null,
+    'environmental' : IDL.Null,
+    'communityService' : IDL.Null,
+  });
+  const Post = IDL.Record({
+    'id' : IDL.Text,
+    'parentPostId' : IDL.Opt(IDL.Text),
+    'video' : IDL.Opt(ExternalBlob),
+    'author' : IDL.Principal,
+    'likes' : IDL.Nat,
+    'timestamp' : Time,
+    'caption' : IDL.Text,
+    'category' : PostCategory,
+    'comments' : IDL.Nat,
+    'photo' : IDL.Opt(ExternalBlob),
+    'isFlagged' : IDL.Bool,
+  });
   const UserProfile = IDL.Record({
     'bio' : IDL.Text,
     'principal' : IDL.Principal,
@@ -210,13 +340,20 @@ export const idlFactory = ({ IDL }) => {
     'following' : IDL.Nat,
     'profilePicture' : IDL.Opt(ExternalBlob),
   });
-  const Time = IDL.Int;
   const StatusUpdate = IDL.Record({
     'music' : IDL.Opt(MusicAttachment),
     'text' : IDL.Opt(IDL.Text),
     'timestamp' : Time,
     'image' : IDL.Opt(ExternalBlob),
   });
+  const LoveNote = IDL.Record({
+    'id' : IDL.Text,
+    'recipient' : IDL.Principal,
+    'sender' : IDL.Principal,
+    'message' : IDL.Text,
+    'timestamp' : Time,
+  });
+  const MemoryJarEntry = IDL.Record({ 'savedAt' : Time, 'postId' : IDL.Text });
   const PhotoAlbumView = IDL.Record({
     'id' : IDL.Text,
     'name' : IDL.Text,
@@ -226,6 +363,18 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'name' : IDL.Text,
     'videos' : IDL.Vec(ExternalBlob),
+  });
+  const DailyChallenge = IDL.Record({
+    'id' : IDL.Text,
+    'date' : Time,
+    'category' : PostCategory,
+    'prompt' : IDL.Text,
+  });
+  const KindnessMatch = IDL.Record({
+    'sharedCategories' : IDL.Vec(PostCategory),
+    'withUser' : IDL.Principal,
+    'compatibilityScore' : IDL.Nat,
+    'reason' : IDL.Text,
   });
   
   return IDL.Service({
@@ -261,6 +410,7 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
+    'addToMemoryJar' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'addVideoToAlbum' : IDL.Func([IDL.Text, ExternalBlob], [IDL.Bool], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'attachMusicToStatus' : IDL.Func(
@@ -268,7 +418,24 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
+    'completeDailyChallenge' : IDL.Func(
+        [IDL.Text, IDL.Text],
+        [ChallengeCompletion],
+        [],
+      ),
     'createPhotoAlbum' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'createPost' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Opt(IDL.Text),
+          IDL.Opt(ExternalBlob),
+          IDL.Opt(ExternalBlob),
+          PostCategory,
+        ],
+        [Post],
+        [],
+      ),
     'createVideoAlbum' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'getAllMusicAttachments' : IDL.Func(
         [],
@@ -277,18 +444,33 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getChallengeCompletions' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(ChallengeCompletion)],
+        ['query'],
+      ),
     'getFriendsStatusUpdates' : IDL.Func(
         [IDL.Vec(IDL.Principal)],
         [IDL.Vec(StatusUpdate)],
         ['query'],
       ),
+    'getLoveNotesCount' : IDL.Func([], [IDL.Nat], ['query']),
     'getMusicAttachment' : IDL.Func(
         [IDL.Text],
         [IDL.Opt(MusicAttachment)],
         ['query'],
       ),
+    'getMyLoveNotes' : IDL.Func([], [IDL.Vec(LoveNote)], ['query']),
+    'getMyMemoryJar' : IDL.Func([], [IDL.Vec(MemoryJarEntry)], ['query']),
     'getMyPhotoAlbums' : IDL.Func([], [IDL.Vec(PhotoAlbumView)], ['query']),
     'getMyVideoAlbums' : IDL.Func([], [IDL.Vec(VideoAlbumView)], ['query']),
+    'getRippleChain' : IDL.Func([IDL.Text], [IDL.Vec(Post)], ['query']),
+    'getTodaysChallenge' : IDL.Func([], [IDL.Opt(DailyChallenge)], ['query']),
+    'getTopMatches' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(KindnessMatch)],
+        ['query'],
+      ),
     'getUserAlbums' : IDL.Func(
         [IDL.Principal],
         [
@@ -297,6 +479,11 @@ export const idlFactory = ({ IDL }) => {
             'videoAlbums' : IDL.Vec(VideoAlbumView),
           }),
         ],
+        ['query'],
+      ),
+    'getUserChallengeCompletions' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(ChallengeCompletion)],
         ['query'],
       ),
     'getUserPhotoAlbums' : IDL.Func(
@@ -337,8 +524,24 @@ export const idlFactory = ({ IDL }) => {
       ),
     'initializeAccessControl' : IDL.Func([], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'removeFromMemoryJar' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'removeMusicAttachment' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'sendLoveNote' : IDL.Func(
+        [IDL.Text, IDL.Principal, IDL.Text],
+        [IDL.Text],
+        [],
+      ),
+    'setDailyChallenge' : IDL.Func(
+        [IDL.Text, IDL.Text, PostCategory, Time],
+        [DailyChallenge],
+        [],
+      ),
+    'storeKindnessMatches' : IDL.Func(
+        [IDL.Principal, IDL.Vec(KindnessMatch)],
+        [],
+        [],
+      ),
   });
 };
 

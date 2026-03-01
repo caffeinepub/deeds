@@ -2,33 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-the-header-component-frontend-src-components-header-tsx-replace-the-current-logo-image-rendered-inside-the-header-button-xpath-html-1-body-1-div-1-div-1-header-1-div-1-button-1-img-1-with-the-original-saved-deeds-logo-asset-at-frontend-public-assets-generated-deeds-logo-png-ensure-the-img-src-points-to-assets-generated-deeds-logo-png",
-      "featureTitle": "In the Header component (frontend/src/components/Header.tsx), replace the current logo image rendered inside the header button (XPath: /html[1]/body[1]/div[1]/div[1]/header[1]/div[1]/button[1]/img[1]) with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'.",
+      "featureId": "feature-build-a-ripple-effect-stories-ui-on-each-postcard-show-a-this-inspired-me-button-that-opens-a-ripple-post-creation-modal-pre-linked-to-the-parent-deed-display-the-ripple-chain-as-a-visual-tree-timeline-beneath-the-original-post-showing-how-kindness-spread-from-one-deed-to-many",
+      "featureTitle": "Build a Ripple Effect Stories UI: on each PostCard, show a 'This inspired me' button that opens a ripple post creation modal pre-linked to the parent deed. Display the ripple chain as a visual tree/timeline beneath the original post, showing how kindness spread from one deed to many.",
       "files": [
-        "frontend/src/components/Header.tsx"
-      ],
-      "components": [
-        "authorization@3.0.0",
-        "blob-storage@3.0.0",
-        "camera@1.0.0",
-        "http-outcalls@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-in-the-main-page-hero-section-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-1-img-1-replace-the-current-logo-image-with-the-original-saved-deeds-logo-asset-at-frontend-public-assets-generated-deeds-logo-png-ensure-the-img-src-points-to-assets-generated-deeds-logo-png-this-likely-corresponds-to-the-gate-or-loginprompt-component-hero-logo",
-      "featureTitle": "In the main page/hero section (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/img[1]), replace the current logo image with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'. This likely corresponds to the Gate or LoginPrompt component hero logo.",
-      "files": [
-        "frontend/src/components/Gate.tsx",
-        "frontend/src/components/LoginPrompt.tsx"
+        "frontend/src/components/CreatePostModal.tsx",
+        "frontend/src/components/PostCard.tsx",
+        "frontend/src/components/RippleChainView.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@3.0.0",
@@ -43,6 +23,134 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-love-notes-to-strangers-page-accessible-from-the-main-navigation-show-a-warm-romantic-card-ui-where-authenticated-users-can-type-and-send-an-anonymous-note-display-received-notes-in-a-scrollable-inbox-styled-like-sealed-letter-envelopes-that-open-on-click-revealing-the-message-with-a-soft-animation",
+      "featureTitle": "Build a Love Notes to Strangers page accessible from the main navigation: show a warm, romantic card UI where authenticated users can type and send an anonymous note. Display received notes in a scrollable inbox styled like sealed letter envelopes that open on click, revealing the message with a soft animation.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/LoveNoteCard.tsx",
+        "frontend/src/components/LoveNotes.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-deed-of-the-day-challenge-page-display-today-s-challenge-prompt-in-a-large-celebratory-hero-card-with-a-countdown-to-the-next-day-s-challenge-show-a-accept-complete-button-that-opens-the-post-creation-modal-pre-filled-with-the-challenge-context-below-the-hero-render-a-live-community-wall-of-everyone-who-has-completed-today-s-challenge-with-their-deed-posts-participant-count-and-a-progress-ring",
+      "featureTitle": "Build a Deed of the Day Challenge page: display today's challenge prompt in a large, celebratory hero card with a countdown to the next day's challenge. Show a 'Accept & Complete' button that opens the post creation modal pre-filled with the challenge context. Below the hero, render a live community wall of everyone who has completed today's challenge with their deed posts, participant count, and a progress ring.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/ChallengeCountdown.tsx",
+        "frontend/src/components/CreatePostModal.tsx",
+        "frontend/src/components/DeedOfTheDay.tsx",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-kindness-matches-page-display-the-current-user-s-top-5-matched-users-as-profile-cards-with-a-compatibility-percentage-shared-deed-categories-and-the-reason-they-were-matched-include-a-say-hello-button-on-each-card-that-initiates-a-message-to-that-user-style-the-page-with-a-warm-heart-themed-romantic-aesthetic",
+      "featureTitle": "Build a Kindness Matches page: display the current user's top 5 matched users as profile cards with a compatibility percentage, shared deed categories, and the reason they were matched. Include a 'Say Hello 👋' button on each card that initiates a message to that user. Style the page with a warm, heart-themed romantic aesthetic.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/KindnessMatchCard.tsx",
+        "frontend/src/components/KindnessMatches.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-memory-jar-ui-add-a-mason-jar-bookmark-icon-to-every-postcard-that-fills-animates-when-a-post-is-saved-create-a-dedicated-memory-jar-profile-section-accessible-from-the-profile-page-displaying-all-saved-posts-in-a-cozy-scrapbook-grid-layout-with-a-vintage-paper-warmth-aesthetic-show-a-count-badge-on-the-jar-icon-in-the-profile-nav",
+      "featureTitle": "Build a Memory Jar UI: add a mason-jar bookmark icon to every PostCard that fills/animates when a post is saved. Create a dedicated Memory Jar profile section (accessible from the Profile page) displaying all saved posts in a cozy scrapbook grid layout with a vintage paper/warmth aesthetic. Show a count badge on the jar icon in the profile nav.",
+      "files": [
+        "frontend/src/components/MemoryJarPostCard.tsx",
+        "frontend/src/components/MemoryJarView.tsx",
+        "frontend/src/components/PostCard.tsx",
+        "frontend/src/components/Profile.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-main-navigation-header-component-to-include-links-to-all-five-new-features-love-notes-deed-of-the-day-kindness-matches-and-memory-jar-memory-jar-also-accessible-from-profile-ensure-all-new-pages-are-registered-as-routes-in-app-tsx",
+      "featureTitle": "Update the main navigation (Header component) to include links to all five new features: Love Notes, Deed of the Day, Kindness Matches, and Memory Jar (Memory Jar also accessible from Profile). Ensure all new pages are registered as routes in App.tsx.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Header.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
       ],
       "confidence": "high"
     }

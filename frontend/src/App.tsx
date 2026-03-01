@@ -23,6 +23,9 @@ import ServiceStatusChecker from './components/ServiceStatusChecker';
 import StartupRecoveryScreen from './components/StartupRecoveryScreen';
 import TopLevelErrorBoundary from './components/TopLevelErrorBoundary';
 import UpdateAvailableBanner from './components/UpdateAvailableBanner';
+import LoveNotes from './components/LoveNotes';
+import DeedOfTheDay from './components/DeedOfTheDay';
+import KindnessMatches from './components/KindnessMatches';
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
 
 const queryClient = new QueryClient({
@@ -37,9 +40,9 @@ const queryClient = new QueryClient({
 
 function Layout() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'oklch(100% 0 0)', color: 'oklch(20% 0 0)' }}>
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
       <Footer />
@@ -123,6 +126,24 @@ const serviceStatusRoute = createRoute({
   component: ServiceStatusChecker,
 });
 
+const loveNotesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/love-notes',
+  component: LoveNotes,
+});
+
+const deedOfTheDayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/deed-of-the-day',
+  component: DeedOfTheDay,
+});
+
+const kindnessMatchesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/kindness-matches',
+  component: KindnessMatches,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   gateRoute,
@@ -136,6 +157,9 @@ const routeTree = rootRoute.addChildren([
   spaceRoute,
   adminRoute,
   serviceStatusRoute,
+  loveNotesRoute,
+  deedOfTheDayRoute,
+  kindnessMatchesRoute,
 ]);
 
 const router = createRouter({ routeTree });
@@ -180,17 +204,14 @@ function AppWithWatchdog() {
 
   useEffect(() => {
     if (isInRecoveryCooldown()) {
-      console.log('[Watchdog] In recovery cooldown, skipping');
       return;
     }
 
     if (hasRecoveryBeenAttempted()) {
-      console.log('[Watchdog] Recovery already attempted, skipping');
       return;
     }
 
     const timer = setTimeout(() => {
-      console.warn('[Watchdog] App appears stuck during initialization');
       setIsStuck(true);
       markRecoveryAttempted();
     }, 15000);
@@ -208,7 +229,7 @@ function AppWithWatchdog() {
 export default function App() {
   return (
     <TopLevelErrorBoundary>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <QueryClientProvider client={queryClient}>
           <InternetIdentityProvider>
             <LanguageProvider>

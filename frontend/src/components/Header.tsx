@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 
@@ -41,46 +42,83 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
+    <header
+      className="sticky top-0 z-40 w-full border-b"
+      style={{
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(8px)',
+        borderColor: 'oklch(90% 0 0)',
+      }}
+    >
+      <div className="container flex h-16 items-center justify-between px-4 mx-auto max-w-7xl">
+        {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none"
           aria-label="Go to home"
         >
           <img
-            src="/assets/generated/deeds-logo.png"
+            src="/assets/generated/deeds-header-logo-star-flash-enhanced.dim_300x100.png"
             alt="Deeds"
-            className="h-10 w-auto"
+            className="h-10 w-auto object-contain"
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.style.display = 'none';
+              const fallback = target.nextElementSibling as HTMLElement;
+              if (fallback) fallback.style.display = 'flex';
+            }}
           />
+          <span
+            className="hidden items-center text-2xl font-bold"
+            style={{ color: 'oklch(55% 0.18 25)', display: 'none' }}
+          >
+            Deeds
+          </span>
         </button>
 
-        <div className="flex items-center gap-3">
+        {/* Nav actions */}
+        <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Navigation menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onClick={() => navigate({ to: '/feed' })}>
-                Feed
+                📰 Feed
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: '/discover' })}>
-                Discover
+                🔍 Discover
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: '/blog' })}>
-                Blog
+                📝 Blog
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: '/marketplace' })}>
-                Marketplace
+                🛍️ Marketplace
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: '/live' })}>
-                Live
+                🔴 Live
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: '/space' })}>
-                Space
+                🌌 Space
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate({ to: '/love-notes' })}>
+                💌 Love Notes
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: '/deed-of-the-day' })}>
+                🌟 Deed of the Day
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: '/kindness-matches' })}>
+                💞 Kindness Matches
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {isAuthenticated && (
+                <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
+                  👤 Profile
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 

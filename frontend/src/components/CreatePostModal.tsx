@@ -5,26 +5,37 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
   DialogClose,
 } from './ui/dialog';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { useCreatePost, type PostCategory } from '../hooks/useQueries';
+import { useCreatePost, useCompleteDailyChallenge, type PostCategory } from '../hooks/useQueries';
 import { ExternalBlob } from '../backend';
 import { toast } from 'sonner';
-import { Image, Video, X, Sparkles, Music } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
+import { Image, Video, X, Sparkles, Music, Zap, Star } from 'lucide-react';
 import { Slider } from './ui/slider';
+import { Badge } from './ui/badge';
 
 interface CreatePostModalProps {
   onClose: () => void;
+  parentPostId?: string;
+  parentCaption?: string;
+  parentAuthorName?: string;
+  challengeId?: string;
+  challengePrompt?: string;
 }
 
-export default function CreatePostModal({ onClose }: CreatePostModalProps) {
-  const [caption, setCaption] = useState('');
+export default function CreatePostModal({ 
+  onClose, 
+  parentPostId, 
+  parentCaption, 
+  parentAuthorName,
+  challengeId,
+  challengePrompt,
+}: CreatePostModalProps) {
+  const [caption, setCaption] = useState(challengePrompt ? `✅ Challenge: ${challengePrompt}\n\n` : '');
   const [category, setCategory] = useState<string>('actsOfKindness');
   const [photo, setPhoto] = useState<ExternalBlob | null>(null);
   const [video, setVideo] = useState<ExternalBlob | null>(null);
@@ -35,6 +46,7 @@ export default function CreatePostModal({ onClose }: CreatePostModalProps) {
   const [brightness, setBrightness] = useState(50);
   const [selectedMusic, setSelectedMusic] = useState<string | null>(null);
   const createPost = useCreatePost();
+  const completeDailyChallenge = useCompleteDailyChallenge();
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -111,13 +123,34 @@ export default function CreatePostModal({ onClose }: CreatePostModalProps) {
     try {
       const categoryVariant: PostCategory = { __kind__: category as any };
       
-      await createPost.mutateAsync({
+      const newPost = await createPost.mutateAsync({
         caption: caption.trim(),
+        parentPostId: parentPostId,
         photo: photo || undefined,
         video: video || undefined,
         category: categoryVariant,
       });
-      toast.success('Post shared successfully!');
+
+      // If this is a challenge completion, register it
+      if (challengeId && newPost && 'id' in newPost) {
+        try {
+          await completeDailyChallenge.mutateAsync({
+            challengeId,
+            postId: (newPost as any).id,
+          });
+        } catch (err) {
+          // Non-fatal: post was created, challenge completion may have failed
+          console.error('Challenge completion error:', err);
+        }
+      }
+
+      if (parentPostId) {
+        toast.success('Your inspired deed has been shared! ✨');
+      } else if (challengeId) {
+        toast.success('Challenge completed! 🌟 You did it!');
+      } else {
+        toast.success('Post shared successfully!');
+      }
       onClose();
     } catch (error) {
       console.error('Error creating post:', error);
@@ -128,6 +161,8 @@ export default function CreatePostModal({ onClose }: CreatePostModalProps) {
   const filterStyle = {
     filter: `brightness(${brightness}%) saturate(${warmth > 50 ? 100 + (warmth - 50) : 100}%)`,
   };
+
+  const isSubmitting = createPost.isPending || completeDailyChallenge.isPending;
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -142,12 +177,34 @@ export default function CreatePostModal({ onClose }: CreatePostModalProps) {
         </DialogClose>
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Share a Good Deed
+            {challengeId ? '🌟 Complete Today\'s Challenge' : parentPostId ? '✨ Share Your Inspired Deed' : 'Share a Good Deed'}
           </DialogTitle>
           <DialogDescription className="text-base">
-            Tell the community what's on your mind!
+            {challengeId ? 'Tell the community how you completed today\'s challenge!' : parentPostId ? 'Tell the community what this deed inspired you to do!' : 'Tell the community what\'s on your mind!'}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Inspired by banner */}
+        {parentPostId && parentCaption && (
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
+            <Zap className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-amber-700 mb-1">Inspired by {parentAuthorName || 'someone'}</p>
+              <p className="text-sm text-amber-800 line-clamp-2">{parentCaption}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Challenge banner */}
+        {challengeId && challengePrompt && (
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-yellow-50 border border-yellow-200">
+            <Star className="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-yellow-700 mb-1">Today's Challenge</p>
+              <p className="text-sm text-yellow-800">{challengePrompt}</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="space-y-3">
@@ -303,131 +360,65 @@ export default function CreatePostModal({ onClose }: CreatePostModalProps) {
                       </Select>
                     </div>
                   )}
-
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => toast.info('Stickers library coming soon! 🎨')}
-                    >
-                      <img src="/assets/generated/animated-stickers-library-icon-transparent.dim_64x64.png" alt="" className="h-4 w-4 mr-2" />
-                      Stickers
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => toast.info('GIFs library coming soon! ✨')}
-                    >
-                      <img src="/assets/generated/uplifting-gifs-library-icon-transparent.dim_64x64.png" alt="" className="h-4 w-4 mr-2" />
-                      GIFs
-                    </Button>
-                  </div>
                 </div>
               </div>
             ) : (
-              <Tabs defaultValue="photo" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-12">
-                  <TabsTrigger value="photo" className="text-base">
-                    <Image className="h-4 w-4 mr-2" />
-                    Photo
-                  </TabsTrigger>
-                  <TabsTrigger value="video" className="text-base">
-                    <Video className="h-4 w-4 mr-2" />
-                    Video
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="photo" className="mt-4">
-                  <label
-                    htmlFor="photo"
-                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer hover:bg-accent/50 transition-all duration-200 hover:border-primary"
-                  >
-                    <Image className="h-10 w-10 text-muted-foreground mb-3" />
-                    <span className="text-base text-muted-foreground font-medium">
-                      Click to upload a photo
-                    </span>
-                    <span className="text-sm text-muted-foreground mt-1">
-                      Max 10MB
-                    </span>
-                    <input
-                      id="photo"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                </TabsContent>
-                <TabsContent value="video" className="mt-4">
-                  <label
-                    htmlFor="video"
-                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer hover:bg-accent/50 transition-all duration-200 hover:border-primary"
-                  >
-                    <Video className="h-10 w-10 text-muted-foreground mb-3" />
-                    <span className="text-base text-muted-foreground font-medium">
-                      Click to upload a video
-                    </span>
-                    <span className="text-sm text-muted-foreground mt-1">
-                      Max 50MB
-                    </span>
-                    <input
-                      id="video"
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoChange}
-                      className="hidden"
-                    />
-                  </label>
-                </TabsContent>
-              </Tabs>
-            )}
-            {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Uploading...</span>
-                  <span className="font-semibold text-primary">{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-primary to-accent h-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all">
+                  <Image className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm font-medium">Add Photo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
                   />
-                </div>
+                </label>
+                <label className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all">
+                  <Video className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm font-medium">Add Video</span>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleVideoChange}
+                  />
+                </label>
               </div>
             )}
           </div>
 
-          <DialogFooter className="gap-3 sm:gap-0">
+          <div className="flex gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-11 px-6"
-              disabled={createPost.isPending}
+              className="flex-1"
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={createPost.isPending || !caption.trim()}
-              className="h-11 px-8 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+              className="flex-1"
+              disabled={isSubmitting || !caption.trim()}
             >
-              {createPost.isPending ? (
+              {isSubmitting ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
                   Sharing...
                 </>
+              ) : challengeId ? (
+                '🌟 Complete Challenge'
+              ) : parentPostId ? (
+                '✨ Share Inspired Deed'
               ) : (
-                'Share Post'
+                'Share Deed'
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
-

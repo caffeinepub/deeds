@@ -8,16 +8,19 @@ import {
   useGetNotifications,
   useSaveCallerUserProfile,
   useGetUserAlbums,
+  useGetMyMemoryJar,
 } from '../hooks/useQueries';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Separator } from './ui/separator';
 import { Loader2, Bell, Edit, Image as ImageIcon, Video, Camera } from 'lucide-react';
 import FollowersModal from './FollowersModal';
 import FollowingModal from './FollowingModal';
 import NotificationsPanel from './NotificationsPanel';
 import UpdateStatusModal from './UpdateStatusModal';
+import MemoryJarView from './MemoryJarView';
 import { ExternalBlob } from '../backend';
 import { toast } from 'sonner';
 
@@ -30,6 +33,7 @@ export default function Profile() {
   const { data: following } = useGetFollowing(currentUserPrincipal || null);
   const { data: notifications } = useGetNotifications();
   const { data: userAlbums } = useGetUserAlbums(currentUserPrincipal || null);
+  const { data: memoryJar } = useGetMyMemoryJar();
   const saveProfile = useSaveCallerUserProfile();
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
@@ -43,6 +47,7 @@ export default function Profile() {
 
   const photoAlbums = userAlbums?.photoAlbums || [];
   const videoAlbums = userAlbums?.videoAlbums || [];
+  const jarCount = memoryJar?.length || 0;
 
   const getInitials = (name: string) => {
     return name
@@ -164,6 +169,10 @@ export default function Profile() {
                   <div className="font-bold text-xl">{sortedPosts.length}</div>
                   <div className="text-sm text-muted-foreground">Posts</div>
                 </div>
+                <div className="text-center">
+                  <div className="font-bold text-xl">{jarCount}</div>
+                  <div className="text-sm text-muted-foreground">Saved 🫙</div>
+                </div>
               </div>
 
               <div className="flex gap-2">
@@ -190,89 +199,118 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {(photoAlbums.length > 0 || videoAlbums.length > 0) && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Albums</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {photoAlbums.map((album) => (
-                <div key={album.id} className="space-y-2">
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                    {album.photos.length > 0 ? (
-                      <img
-                        src={album.photos[0].getDirectURL()}
-                        alt={album.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <ImageIcon className="h-12 w-12 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium">{album.name}</p>
-                    <p className="text-sm text-muted-foreground">{album.photos.length} photos</p>
-                  </div>
-                </div>
-              ))}
-              {videoAlbums.map((album) => (
-                <div key={album.id} className="space-y-2">
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                    <Video className="h-12 w-12 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{album.name}</p>
-                    <p className="text-sm text-muted-foreground">{album.videos.length} videos</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="posts" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="posts">Posts ({sortedPosts.length})</TabsTrigger>
+          <TabsTrigger value="albums">Albums</TabsTrigger>
+          <TabsTrigger value="memory-jar" className="relative">
+            Memory Jar 🫙
+            {jarCount > 0 && (
+              <span className="ml-1.5 bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                {jarCount}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>My Posts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {postsLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : sortedPosts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No posts yet
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {sortedPosts.map((post) => (
-                <div key={post.id} className="aspect-square bg-muted rounded-lg overflow-hidden">
-                  {post.photo && (
-                    <img
-                      src={post.photo.getDirectURL()}
-                      alt="Post"
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  {post.video && (
-                    <video
-                      src={post.video.getDirectURL()}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  {!post.photo && !post.video && (
-                    <div className="w-full h-full flex items-center justify-center p-2">
-                      <p className="text-xs line-clamp-3">{post.caption}</p>
-                    </div>
-                  )}
+        <TabsContent value="posts">
+          <Card>
+            <CardHeader>
+              <CardTitle>My Posts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {postsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
-              ))}
-            </div>
+              ) : sortedPosts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No posts yet
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {sortedPosts.map((post) => (
+                    <div key={post.id} className="aspect-square bg-muted rounded-lg overflow-hidden">
+                      {post.photo && (
+                        <img
+                          src={post.photo.getDirectURL()}
+                          alt="Post"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {post.video && (
+                        <video
+                          src={post.video.getDirectURL()}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {!post.photo && !post.video && (
+                        <div className="w-full h-full flex items-center justify-center p-2">
+                          <p className="text-xs line-clamp-3">{post.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="albums">
+          {(photoAlbums.length > 0 || videoAlbums.length > 0) ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Albums</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {photoAlbums.map((album) => (
+                    <div key={album.id} className="space-y-2">
+                      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                        {album.photos.length > 0 ? (
+                          <img
+                            src={album.photos[0].getDirectURL()}
+                            alt={album.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{album.name}</p>
+                        <p className="text-sm text-muted-foreground">{album.photos.length} photos</p>
+                      </div>
+                    </div>
+                  ))}
+                  {videoAlbums.map((album) => (
+                    <div key={album.id} className="space-y-2">
+                      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                        <Video className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{album.name}</p>
+                        <p className="text-sm text-muted-foreground">{album.videos.length} videos</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                No albums yet
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="memory-jar">
+          <MemoryJarView />
+        </TabsContent>
+      </Tabs>
 
       {showFollowers && (
         <FollowersModal 

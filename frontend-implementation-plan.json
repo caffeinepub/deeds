@@ -1,42 +1,223 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Revert logo to saved Deeds logo in Header and LoginPrompt",
+  "title": "Add Ripple Effect Stories, Love Notes, Deed of the Day, Kindness Matches & Memory Jars",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Replace the Header component logo with the original saved Deeds logo asset",
+      "id": "REQ-2",
+      "summary": "Build Ripple Effect Stories UI with 'This inspired me' button and visual ripple chain display",
       "acceptanceCriteria": [
-        "The header logo img src is set to '/assets/generated/deeds-logo.png'",
-        "The original Deeds logo is visible in the top navigation header",
-        "No broken image or placeholder is displayed in the header"
+        "Each post card shows a 'This inspired me ✨' button",
+        "Tapping it opens a create-post modal with the parent deed linked",
+        "Ripple chain view shows the originating deed and all descendant deeds in a tree or timeline layout",
+        "Chain displays author avatars, captions, and timestamps"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PostCard.tsx",
+          "operation": "modify",
+          "description": "Add a 'This inspired me ✨' button to the post action bar that opens the CreatePostModal with the current post's ID pre-filled as the parent. Position it near the existing like/comment/share buttons. Use the generated ripple effect icon at frontend/public/assets/generated/ripple-effect-hero.dim_800x400.png for visual branding in related UI elements."
+        },
+        {
+          "path": "frontend/src/components/CreatePostModal.tsx",
+          "operation": "modify",
+          "description": "Accept an optional parentPostId prop. When provided, display a small 'Inspired by' banner at the top of the modal showing the parent post's author and caption snippet. Pass parentPostId to the backend when creating the post. Ensure the modal state resets properly when closed and reopened."
+        },
+        {
+          "path": "frontend/src/components/RippleChainView.tsx",
+          "operation": "create",
+          "description": "Create a component that displays the ripple chain for a given post ID. Fetch the chain using getRippleChain from the backend. Render the originating post at the top, followed by descendant posts in a tree or vertical timeline layout with connecting lines. Show author avatars, captions (truncated), and relative timestamps. Use animated entry transitions for each chain node. Include the generated ripple effect hero image frontend/public/assets/generated/ripple-effect-hero.dim_800x400.png as a decorative header when the chain has multiple levels."
+        },
+        {
+          "path": "frontend/src/components/PostCard.tsx",
+          "operation": "modify",
+          "description": "Add a 'View Ripple Chain' button or expandable section that renders the RippleChainView component inline or in a modal when the post has ripple descendants. Query the backend to check if the post has children before showing this button."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks: useGetRippleChain(postId) to fetch the ripple chain for a post, and useCreatePost mutation that accepts an optional parentPostId parameter and passes it to the backend createPost function."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Build Love Notes to Strangers page with send form and animated envelope inbox",
+      "acceptanceCriteria": [
+        "Navigation includes a 'Love Notes' link",
+        "Send form has a 280-character textarea and a 'Send to a Stranger 💌' button",
+        "Received notes appear as envelope cards; clicking one animates it open to reveal the message",
+        "Sender is shown only as 'A Kind Stranger'",
+        "Empty state shows an encouraging message when no notes have been received"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/LoveNotes.tsx",
+          "operation": "create",
+          "description": "Create the Love Notes page with two sections: a warm, romantic card UI for composing and sending an anonymous note (textarea with 280 char limit, character counter, and 'Send to a Stranger 💌' button), and a scrollable inbox below displaying received notes. Use the generated love note envelope image frontend/public/assets/generated/love-note-envelope.dim_256x256.png for the envelope card visual. Apply soft pastel colors (pinks, lavenders, warm golds) and gentle shadows for a romantic aesthetic. Show a toast notification on successful send. Require authentication to access this page."
+        },
+        {
+          "path": "frontend/src/components/LoveNoteCard.tsx",
+          "operation": "create",
+          "description": "Create a card component representing a received love note as a sealed envelope. Use the generated envelope image frontend/public/assets/generated/love-note-envelope.dim_256x256.png. On click, animate the envelope opening (scale + fade transition) to reveal the note message, sender label ('A Kind Stranger'), and timestamp. Support closing the note to return to envelope state. Style with warm tones and soft drop shadows."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks: useSendLoveNote mutation to send a note via backend sendLoveNote, and useGetMyLoveNotes to fetch received notes via backend getMyLoveNotes. Enable polling (refetchInterval: 30000) on useGetMyLoveNotes for near-real-time updates."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Add a 'Love Notes 💌' link to the navigation dropdown menu that routes to /love-notes. Position it between Blog and Marketplace links. Show a small badge with the count of unread love notes fetched via backend getLoveNotesCount if the user is authenticated."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /love-notes route in the router configuration, rendering the LoveNotes component. Ensure the route is protected and requires authentication."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Build Deed of the Day Challenge page with hero card, countdown timer, and live community wall",
+      "acceptanceCriteria": [
+        "Hero card shows today's challenge text, category, and a live countdown timer to midnight",
+        "Participant count and progress ring update in real time via React Query polling",
+        "Community wall shows completion posts with author avatars and captions",
+        "Completed users see a 'You did it today! 🌟' badge instead of the accept button"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DeedOfTheDay.tsx",
+          "operation": "create",
+          "description": "Create the Deed of the Day Challenge page. Display a large hero card with today's challenge prompt, category badge, and a live countdown timer to midnight. Use the generated deed of the day hero image frontend/public/assets/generated/deed-of-the-day-hero.dim_800x400.png as a background or decorative element. Show an 'Accept & Complete' button that opens the CreatePostModal pre-filled with challenge context, or a 'You did it today! 🌟' badge if the user has already completed it. Below the hero, render a community wall grid of all completion posts fetched via getChallengeCompletions, showing participant avatars, captions, and timestamps. Display a participant count and animated progress ring. Use celebratory colors (coral, gold, warm yellows). Require authentication."
+        },
+        {
+          "path": "frontend/src/components/ChallengeCountdown.tsx",
+          "operation": "create",
+          "description": "Create a countdown timer component that displays hours, minutes, and seconds remaining until midnight local time. Update every second using setInterval. Style with large, bold numerals and a subtle pulsing animation."
+        },
+        {
+          "path": "frontend/src/components/CreatePostModal.tsx",
+          "operation": "modify",
+          "description": "Accept an optional challengeId prop. When provided, display a 'Completing Challenge' banner at the top of the modal with the challenge prompt. After the post is created, call the backend completeDailyChallenge function with the challengeId and the newly created post ID to register the completion."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks: useGetTodaysChallenge to fetch today's challenge via backend getTodaysChallenge, useGetChallengeCompletions(challengeId) to fetch all completions for a challenge, and useCompleteDailyChallenge mutation to complete a challenge. Enable polling (refetchInterval: 10000) on completions query for near-real-time participant updates. Add useGetUserChallengeCompletions(user) to check if the current user has completed today's challenge."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Add a 'Deed of the Day 🌟' link to the navigation dropdown menu that routes to /deed-of-the-day. Position it after Love Notes."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /deed-of-the-day route in the router configuration, rendering the DeedOfTheDay component. Ensure the route is protected and requires authentication."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Build Kindness Matches page displaying top 5 matched users with compatibility scores and 'Say Hello' button",
+      "acceptanceCriteria": [
+        "Page shows up to 5 match cards with avatar, name, compatibility percentage, shared categories, and match reason",
+        "'Say Hello 👋' button opens the Messages component pre-addressed to that user",
+        "Cards animate in with a gentle fade/slide entrance",
+        "Empty state encourages the user to post more deeds to find matches"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/KindnessMatches.tsx",
+          "operation": "create",
+          "description": "Create the Kindness Matches page that fetches the current user's top 5 matches via getTopMatches. Display each match as a profile card with avatar, name (fetched via getUserProfile), compatibility percentage, shared deed categories as badge pills, and the match reason text. Include a 'Say Hello 👋' button that opens the Messages component (via navigation or modal) pre-addressed to that user. Use the generated kindness match hero image frontend/public/assets/generated/kindness-match-hero.dim_800x400.png as a page header or decorative background. Apply a warm, heart-themed romantic aesthetic with soft pinks, pastels, and subtle heart motifs. Animate cards with staggered fade-in and slide-up transitions. Show an encouraging empty state with an illustration if no matches exist. Require authentication."
+        },
+        {
+          "path": "frontend/src/components/KindnessMatchCard.tsx",
+          "operation": "create",
+          "description": "Create a card component for a single Kindness Match. Display the matched user's avatar, name, compatibility score as a percentage with a progress bar or circular gauge, shared category badges, and the match reason text. Include a 'Say Hello 👋' button. Style with warm colors, subtle glow effects, and a soft shadow. Support hover animations for interactivity."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hook: useGetTopMatches(user) to fetch the top 5 kindness matches for a given user via backend getTopMatches. Ensure the hook fetches user profiles for each matched principal to display names and avatars."
+        },
+        {
+          "path": "frontend/src/components/Messages.tsx",
+          "operation": "modify",
+          "description": "Accept an optional initialRecipient prop (Principal). When provided, pre-select that user in the message recipient list and focus the message input field, allowing the user to immediately start composing a message."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Add a 'Kindness Matches 💞' link to the navigation dropdown menu that routes to /kindness-matches. Position it after Deed of the Day."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /kindness-matches route in the router configuration, rendering the KindnessMatches component. Ensure the route is protected and requires authentication."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Build Memory Jar UI with save/unsave buttons on posts and a scrapbook view on Profile",
+      "acceptanceCriteria": [
+        "Every post card has a jar/bookmark icon that toggles saved state with a fill animation",
+        "Memory Jar tab on the Profile page displays all saved posts in a warm scrapbook grid",
+        "Jar count badge on the profile nav updates reactively",
+        "Empty jar state shows an illustrated message inviting users to save their first deed",
+        "Removing a post from the jar is supported via an unsave button on the scrapbook cards"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PostCard.tsx",
+          "operation": "modify",
+          "description": "Add a mason-jar or bookmark icon button to the post action bar. Query the backend to check if the current post is in the user's Memory Jar. When clicked, toggle the saved state by calling addToMemoryJar or removeFromMemoryJar. Animate the icon with a fill transition (empty outline to filled, with a subtle glow or bounce) on save. Use the generated memory jar icon image frontend/public/assets/generated/memory-jar-icon.dim_256x256.png for visual consistency. Position the button near other actions (like, comment, share)."
+        },
+        {
+          "path": "frontend/src/components/Profile.tsx",
+          "operation": "modify",
+          "description": "Add a 'Memory Jar 🫙' tab to the profile page tabs alongside Posts and Albums. When selected, render the MemoryJarView component. Display a count badge on the tab label showing the total number of saved posts fetched via getMyMemoryJar."
+        },
+        {
+          "path": "frontend/src/components/MemoryJarView.tsx",
+          "operation": "create",
+          "description": "Create a component that fetches and displays all saved posts from the user's Memory Jar via getMyMemoryJar. Render posts in a cozy scrapbook grid layout with a vintage paper texture background, warm sepia or cream tones, and subtle torn-edge or polaroid-frame styling. Use the generated memory jar icon image frontend/public/assets/generated/memory-jar-icon.dim_256x256.png as a decorative header or empty state illustration. Each post card includes a small 'Remove from Jar' button that calls removeFromMemoryJar and updates the UI reactively. Show an illustrated empty state message ('Your jar is empty—start saving your favorite deeds!') when no posts are saved."
+        },
+        {
+          "path": "frontend/src/components/MemoryJarPostCard.tsx",
+          "operation": "create",
+          "description": "Create a scrapbook-styled post card component for Memory Jar entries. Display the post's photo/video thumbnail, caption (truncated), author avatar, and savedAt timestamp. Include a 'Remove from Jar' icon button with a confirmation tooltip. Style with vintage/scrapbook aesthetics: torn paper edges, subtle shadow, warm tones, and optional handwritten-style font for timestamps."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks: useGetMyMemoryJar to fetch the user's saved posts via backend getMyMemoryJar, useAddToMemoryJar mutation to save a post, and useRemoveFromMemoryJar mutation to unsave a post. Invalidate the memory jar query on successful add/remove to keep the UI in sync."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Update Header navigation to include links to all new features and register routes in App.tsx",
+      "acceptanceCriteria": [
+        "Header dropdown or nav bar includes links to Love Notes, Deed of the Day, and Kindness Matches",
+        "All new pages resolve correctly via the router without 404s",
+        "Active route is visually highlighted in the nav"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "Update the logo image source inside the header button to point to '/assets/generated/deeds-logo.png'. Locate the img element within the header button (first button in the header div) and change its src attribute to use the saved Deeds logo asset at the specified path."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Replace the main page/hero section logo with the original saved Deeds logo asset",
-      "acceptanceCriteria": [
-        "The main/hero section logo img src is set to '/assets/generated/deeds-logo.png'",
-        "The original Deeds logo is visible in the hero/main area of the page",
-        "No broken image or placeholder is displayed in the main content logo area"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Gate.tsx",
-          "operation": "modify",
-          "description": "Update the hero section logo image source to point to '/assets/generated/deeds-logo.png'. Locate the img element in the main hero div (first image in the main content area) and change its src attribute to use the saved Deeds logo asset at the specified path."
+          "description": "Ensure the navigation dropdown includes links to Love Notes (💌), Deed of the Day (🌟), and Kindness Matches (💞). Memory Jar is accessible via the Profile page, so it does not need a top-level nav link. Verify that the active route is visually highlighted using the current link styling approach. Order the links logically: Feed, Discover, Blog, Marketplace, Live, Space, Love Notes, Deed of the Day, Kindness Matches, Profile."
         },
         {
-          "path": "frontend/src/components/LoginPrompt.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update the login page logo image source to point to '/assets/generated/deeds-logo.png'. Locate the img element in the login card's hero section and change its src attribute to use the saved Deeds logo asset at the specified path."
+          "description": "Register three new routes in the router configuration: /love-notes (LoveNotes component), /deed-of-the-day (DeedOfTheDay component), and /kindness-matches (KindnessMatches component). Ensure all routes are protected and require authentication. Verify that the router resolves these paths without 404 errors."
         }
       ]
     }
