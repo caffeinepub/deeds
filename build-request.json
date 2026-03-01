@@ -1,0 +1,57 @@
+{
+  "kind": "build_request",
+  "title": "Revert logo to saved Deeds logo in Header and LoginPrompt",
+  "projectName": "Deeds",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "In the Header component (frontend/src/components/Header.tsx), replace the current logo image rendered inside the header button (XPath: /html[1]/body[1]/div[1]/div[1]/header[1]/div[1]/button[1]/img[1]) with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "go back to the logo i told you to save for me"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The header logo img src is set to '/assets/generated/deeds-logo.png'",
+        "The original Deeds logo is visible in the top navigation header",
+        "No broken image or placeholder is displayed in the header"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "In the main page/hero section (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/img[1]), replace the current logo image with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'. This likely corresponds to the Gate or LoginPrompt component hero logo.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "go back to the logo i told you to save for me"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The main/hero section logo img src is set to '/assets/generated/deeds-logo.png'",
+        "The original Deeds logo is visible in the hero/main area of the page",
+        "No broken image or placeholder is displayed in the main content logo area"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify any other images or assets beyond the two logo img elements identified by the provided XPaths",
+    "Use only the existing saved logo asset at '/assets/generated/deeds-logo.png' — do not generate a new logo image"
+  ],
+  "nonGoals": [
+    "Redesigning the logo or creating a new logo image",
+    "Changing any other UI elements beyond the two logo images",
+    "Modifying backend logic"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-24T20:00:16.326Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "In the Header component (frontend/src/components/Header.tsx), replace the current logo image rendered inside the header button (XPath: /html[1]/body[1]/div[1]/div[1]/header[1]/div[1]/button[1]/img[1]) with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Header.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Header.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "In the main page/hero section (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/img[1]), replace the current logo image with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'. This likely corresponds to the Gate or LoginPrompt component hero logo.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Gate.tsx",
+          "frontend/src/components/LoginPrompt.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Gate.tsx",
+          "frontend/src/components/LoginPrompt.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/Gate.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/LoginPrompt.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

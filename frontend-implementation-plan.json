@@ -1,0 +1,44 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Revert logo to saved Deeds logo in Header and LoginPrompt",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Replace the Header component logo with the original saved Deeds logo asset",
+      "acceptanceCriteria": [
+        "The header logo img src is set to '/assets/generated/deeds-logo.png'",
+        "The original Deeds logo is visible in the top navigation header",
+        "No broken image or placeholder is displayed in the header"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Update the logo image source inside the header button to point to '/assets/generated/deeds-logo.png'. Locate the img element within the header button (first button in the header div) and change its src attribute to use the saved Deeds logo asset at the specified path."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Replace the main page/hero section logo with the original saved Deeds logo asset",
+      "acceptanceCriteria": [
+        "The main/hero section logo img src is set to '/assets/generated/deeds-logo.png'",
+        "The original Deeds logo is visible in the hero/main area of the page",
+        "No broken image or placeholder is displayed in the main content logo area"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Gate.tsx",
+          "operation": "modify",
+          "description": "Update the hero section logo image source to point to '/assets/generated/deeds-logo.png'. Locate the img element in the main hero div (first image in the main content area) and change its src attribute to use the saved Deeds logo asset at the specified path."
+        },
+        {
+          "path": "frontend/src/components/LoginPrompt.tsx",
+          "operation": "modify",
+          "description": "Update the login page logo image source to point to '/assets/generated/deeds-logo.png'. Locate the img element in the login card's hero section and change its src attribute to use the saved Deeds logo asset at the specified path."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-in-the-header-component-frontend-src-components-header-tsx-replace-the-current-logo-image-rendered-inside-the-header-button-xpath-html-1-body-1-div-1-div-1-header-1-div-1-button-1-img-1-with-the-original-saved-deeds-logo-asset-at-frontend-public-assets-generated-deeds-logo-png-ensure-the-img-src-points-to-assets-generated-deeds-logo-png",
+      "featureTitle": "In the Header component (frontend/src/components/Header.tsx), replace the current logo image rendered inside the header button (XPath: /html[1]/body[1]/div[1]/div[1]/header[1]/div[1]/button[1]/img[1]) with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'.",
+      "files": [
+        "frontend/src/components/Header.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-the-main-page-hero-section-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-1-img-1-replace-the-current-logo-image-with-the-original-saved-deeds-logo-asset-at-frontend-public-assets-generated-deeds-logo-png-ensure-the-img-src-points-to-assets-generated-deeds-logo-png-this-likely-corresponds-to-the-gate-or-loginprompt-component-hero-logo",
+      "featureTitle": "In the main page/hero section (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/img[1]), replace the current logo image with the original saved Deeds logo asset at 'frontend/public/assets/generated/deeds-logo.png'. Ensure the img src points to '/assets/generated/deeds-logo.png'. This likely corresponds to the Gate or LoginPrompt component hero logo.",
+      "files": [
+        "frontend/src/components/Gate.tsx",
+        "frontend/src/components/LoginPrompt.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
