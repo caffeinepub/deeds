@@ -1,119 +1,126 @@
-import { useState } from 'react';
-import { useGetComments, useGetUserProfile } from '../hooks/useQueries';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Separator } from './ui/separator';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { useGetPostComments, useGetUserProfile, useCreateComment } from '../hooks/useQueries';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CommentsSectionProps {
   postId: string;
 }
 
-export default function CommentsSection({ postId }: CommentsSectionProps) {
-  const [newComment, setNewComment] = useState('');
-  const { data: comments, isLoading } = useGetComments(postId);
+function CommentItem({ comment }: { comment: any }) {
+  const authorPrincipal = comment.author?.toString() ?? null;
+  const { data: authorProfile } = useGetUserProfile(authorPrincipal);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!newComment.trim()) {
-      toast.error('Please enter a comment');
-      return;
+  const getAvatarUrl = () => {
+    if (authorProfile?.profilePicture && authorProfile.profilePicture.__kind__ === 'Some') {
+      try {
+        const blob = authorProfile.profilePicture.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
     }
-
-    // NOTE: Comment creation is not yet implemented in the backend
-    toast.info('Comment functionality coming soon!');
-    setNewComment('');
+    return undefined;
   };
 
-  const sortedComments = comments
-    ? [...comments].sort((a, b) => Number(b.timestamp - a.timestamp))
-    : [];
+  const timestamp = new Date(Number(comment.timestamp) / 1_000_000).toLocaleDateString();
 
   return (
-    <div className="border-t bg-muted/30">
-      <div className="p-4 space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            rows={2}
-            maxLength={300}
-          />
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">{newComment.length}/300</span>
-            <Button type="submit" size="sm" disabled={!newComment.trim()}>
-              Post Comment
-            </Button>
-          </div>
-        </form>
-
-        <Separator />
-
-        {isLoading ? (
-          <div className="flex justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : sortedComments.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No comments yet. Be the first to comment!
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {sortedComments.map((comment) => (
-              <CommentItem key={comment.id} comment={comment} />
-            ))}
-          </div>
-        )}
+    <div className="flex gap-2 py-2">
+      <Avatar className="w-7 h-7 flex-shrink-0">
+        <AvatarImage src={getAvatarUrl()} alt={authorProfile?.name} />
+        <AvatarFallback className="text-xs">
+          {authorProfile?.name?.[0]?.toUpperCase() ?? '?'}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs font-semibold text-foreground">
+            {authorProfile?.name ?? 'Anonymous'}
+          </span>
+          <span className="text-xs text-muted-foreground">{timestamp}</span>
+        </div>
+        <p className="text-xs text-foreground mt-0.5 break-words">{comment.content}</p>
       </div>
     </div>
   );
 }
 
-function CommentItem({ comment }: { comment: any }) {
-  const { data: authorProfile } = useGetUserProfile(comment.author);
+export default function CommentsSection({ postId }: CommentsSectionProps) {
+  const { data: comments = [], isLoading } = useGetPostComments(postId);
+  const createComment = useCreateComment();
+  const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-  const formatTimestamp = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1000000);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-    return date.toLocaleDateString();
+    setIsSubmitting(true);
+    try {
+      await createComment.mutateAsync({ postId, content: newComment.trim() });
+      setNewComment('');
+    } catch {
+      toast.error('Failed to post comment');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="flex gap-3">
-      <Avatar className="h-8 w-8">
-        {authorProfile?.profilePicture && (
-          <AvatarImage src={authorProfile.profilePicture.getDirectURL()} alt={authorProfile.name} />
-        )}
-        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-          {authorProfile ? getInitials(authorProfile.name) : '?'}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold">{authorProfile?.name || 'Anonymous'}</span>
-          <span className="text-xs text-muted-foreground">{formatTimestamp(comment.timestamp)}</span>
+    <div className="border-t border-border px-3 py-2">
+      {isLoading ? (
+        <div className="space-y-2 py-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="flex gap-2">
+              <Skeleton className="w-7 h-7 rounded-full flex-shrink-0" />
+              <div className="flex-1 space-y-1">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            </div>
+          ))}
         </div>
-        <p className="text-sm">{comment.content}</p>
-      </div>
+      ) : (
+        <div className="divide-y divide-border/50">
+          {comments.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2 text-center">
+              No comments yet. Be the first!
+            </p>
+          ) : (
+            comments.map((comment) => (
+              <CommentItem key={comment.id} comment={comment} />
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Comment form */}
+      <form onSubmit={handleSubmit} className="flex gap-2 mt-2">
+        <Input
+          placeholder="Add a comment..."
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="text-xs h-8"
+          maxLength={300}
+          disabled={isSubmitting}
+        />
+        <Button
+          type="submit"
+          size="sm"
+          variant="ghost"
+          disabled={isSubmitting || !newComment.trim()}
+          className="h-8 px-2"
+        >
+          <Send className="w-3 h-3" />
+        </Button>
+      </form>
     </div>
   );
 }

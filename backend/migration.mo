@@ -1,70 +1,99 @@
-import Map "mo:core/Map";
 import List "mo:core/List";
+import Map "mo:core/Map";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Storage "blob-storage/Storage";
 
 module {
-  // Define the old types
-  type OldPost = {
-    id : Text;
-    author : Principal.Principal;
-    caption : Text;
-    photo : ?Storage.ExternalBlob;
-    video : ?Storage.ExternalBlob;
-    category : {
-      #environmental;
-      #communityService;
-      #actsOfKindness;
-      #other;
-    };
-    timestamp : Time.Time;
-    likes : Nat;
-    comments : Nat;
-    isFlagged : Bool;
-  };
-
-  type OldActor = {
-    posts : Map.Map<Text, OldPost>;
-    // Add other old variables if needed
-  };
-
-  // Define the new types
-  type NewPost = {
+  type Post = {
     id : Text;
     author : Principal.Principal;
     caption : Text;
     parentPostId : ?Text;
     photo : ?Storage.ExternalBlob;
     video : ?Storage.ExternalBlob;
-    category : {
-      #environmental;
-      #communityService;
-      #actsOfKindness;
-      #other;
-    };
+    category : PostCategory;
     timestamp : Time.Time;
     likes : Nat;
     comments : Nat;
     isFlagged : Bool;
   };
 
-  type NewActor = {
-    posts : Map.Map<Text, NewPost>;
-    // Add other new variables if needed
+  type PostCategory = {
+    #environmental;
+    #communityService;
+    #actsOfKindness;
+    #other;
   };
 
-  // Migration function
+  type ArchivedPost = {
+    post : Post;
+    archivedAt : Time.Time;
+  };
+
+  type GradingScale = {
+    #letterGrade;
+    #starRating;
+    #percentage;
+  };
+
+  type ProfileReportCard = {
+    postsCount : Nat;
+    deedsCompleted : Nat;
+    likesReceived : Nat;
+    weekStart : Time.Time;
+    gradingScale : GradingScale;
+    isPublic : Bool;
+    scores : [Score];
+    grade : ?Grade;
+  };
+
+  type Score = {
+    value : Nat32;
+    timestamp : Time.Time;
+  };
+
+  type Grade = {
+    value : Nat32;
+    timestamp : Time.Time;
+  };
+
+  type OldMemoryJarEntry = {
+    postId : Text;
+    savedAt : Time.Time;
+  };
+
+  type OldActor = {
+    memoryJars : Map.Map<Principal.Principal, List.List<OldMemoryJarEntry>>;
+  };
+
+  type NewMemoryJarEntry = {
+    postId : Text;
+    savedAt : Time.Time;
+    isPublic : Bool;
+  };
+
+  type NewActor = {
+    memoryJars : Map.Map<Principal.Principal, List.List<NewMemoryJarEntry>>;
+    postsArchived : List.List<ArchivedPost>;
+    profileReportCards : Map.Map<Principal.Principal, ProfileReportCard>;
+  };
+
   public func run(old : OldActor) : NewActor {
-    let newPosts = old.posts.map<Text, OldPost, NewPost>(
-      func(_id, oldPost) {
-        { oldPost with parentPostId = null };
+    let newMemoryJars = old.memoryJars.map<Principal.Principal, List.List<OldMemoryJarEntry>, List.List<NewMemoryJarEntry>>(
+      func(_principal, oldList) {
+        oldList.map<OldMemoryJarEntry, NewMemoryJarEntry>(
+          func(oldEntry) {
+            { oldEntry with isPublic = false };
+          }
+        );
       }
     );
 
     {
-      posts = newPosts;
-      // Map other variables if needed
+      memoryJars = newMemoryJars;
+      postsArchived = List.empty<ArchivedPost>();
+      profileReportCards = Map.empty<Principal.Principal, ProfileReportCard>();
     };
   };
 };

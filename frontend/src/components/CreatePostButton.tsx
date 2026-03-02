@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import CreatePostModal from './CreatePostModal';
 
 export default function CreatePostButton() {
@@ -8,16 +8,15 @@ export default function CreatePostButton() {
 
   return (
     <>
-      <Button 
-        onClick={() => setShowModal(true)} 
-        className="w-full mb-8 h-14 text-lg font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl bg-gradient-to-r from-primary to-accent hover:opacity-90" 
+      <Button
+        onClick={() => setShowModal(true)}
+        className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-md"
         size="lg"
       >
-        <Plus className="h-6 w-6 mr-2" />
-        Share a Good Deed
+        <Plus className="w-5 h-5" />
+        Share a Deed
       </Button>
-
-      {showModal && <CreatePostModal onClose={() => setShowModal(false)} />}
+      <CreatePostModal isOpen={showModal} onClose={() => setShowModal(false)} />
     </>
   );
 }

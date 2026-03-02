@@ -1,248 +1,209 @@
-import { useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Button } from './ui/button';
-import { MoreHorizontal, Heart, MessageCircle, Share2, Zap, BookmarkPlus, BookmarkCheck, GitBranch } from 'lucide-react';
-import { useGetUserProfile, useLikePost, useAddToMemoryJar, useRemoveFromMemoryJar, useGetMyMemoryJar, type Post } from '../hooks/useQueries';
-import { Badge } from './ui/badge';
-import UserProfileModal from './UserProfileModal';
-import CommentsSection from './CommentsSection';
-import CreatePostModal from './CreatePostModal';
-import RippleChainView from './RippleChainView';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal } from 'lucide-react';
+import { Post, useGetUserProfile, useLikePost, useSaveToMemoryJar } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import CommentsSection from './CommentsSection';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface PostCardProps {
   post: Post;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  environmental: '🌿 Environment',
+  communityService: '🤝 Community',
+  actsOfKindness: '💛 Kindness',
+  other: '✨ Deed',
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  environmental: 'bg-green-100 text-green-700 border-green-200',
+  communityService: 'bg-blue-100 text-blue-700 border-blue-200',
+  actsOfKindness: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  other: 'bg-purple-100 text-purple-700 border-purple-200',
+};
+
 export default function PostCard({ post }: PostCardProps) {
-  const [showProfile, setShowProfile] = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const [showInspireModal, setShowInspireModal] = useState(false);
-  const [showRippleChain, setShowRippleChain] = useState(false);
-  const { data: authorProfile } = useGetUserProfile(post.author);
   const { identity } = useInternetIdentity();
+  const authorPrincipal = post.author?.toString() ?? null;
+  const { data: authorProfile } = useGetUserProfile(authorPrincipal);
   const likePost = useLikePost();
-  const addToJar = useAddToMemoryJar();
-  const removeFromJar = useRemoveFromMemoryJar();
-  const { data: memoryJar } = useGetMyMemoryJar();
+  const saveToJar = useSaveToMemoryJar();
 
-  const isInJar = memoryJar?.some(entry => entry.postId === post.id) ?? false;
-  const isAuthenticated = !!identity;
+  const [showComments, setShowComments] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'environmental': return 'Environmental';
-      case 'communityService': return 'Community Service';
-      case 'actsOfKindness': return 'Acts of Kindness';
-      case 'other': return 'Other';
-      default: return category;
+  const categoryKind = post.category?.__kind__ ?? 'other';
+  const categoryLabel = CATEGORY_LABELS[categoryKind] ?? '✨ Deed';
+  const categoryColor = CATEGORY_COLORS[categoryKind] ?? CATEGORY_COLORS.other;
+
+  const getPhotoUrl = () => {
+    if (post.photo && post.photo.__kind__ === 'Some') {
+      try {
+        const blob = post.photo.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
     }
+    return null;
   };
 
-  const getInitials = (name: string) =>
-    name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-  const formatTimestamp = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1000000);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 7) return `${diffDays}d`;
-    return date.toLocaleDateString();
+  const getVideoUrl = () => {
+    if (post.video && post.video.__kind__ === 'Some') {
+      try {
+        const blob = post.video.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return null;
   };
 
   const handleLike = async () => {
-    if (liked) return;
+    if (isLiking) return;
+    setIsLiking(true);
     try {
       await likePost.mutateAsync(post.id);
-      setLiked(true);
-      toast.success('Post liked!');
-    } catch (error) {
-      console.error('Error liking post:', error);
+    } catch {
+      toast.error('Failed to like post');
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleSaveToJar = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      await saveToJar.mutateAsync(post.id);
+      toast.success('Saved to Memory Jar! 🫙');
+    } catch {
+      toast.error('Failed to save to Memory Jar');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleShare = () => {
-    toast.success('Share functionality coming soon!');
-  };
-
-  const handleMemoryJar = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please log in to save posts');
-      return;
-    }
-    try {
-      if (isInJar) {
-        await removeFromJar.mutateAsync(post.id);
-        toast.success('Removed from Memory Jar 🫙');
-      } else {
-        await addToJar.mutateAsync(post.id);
-        toast.success('Saved to Memory Jar 🫙');
-      }
-    } catch (error) {
-      console.error('Memory jar error:', error);
-      toast.error('Failed to update Memory Jar');
+    if (navigator.share) {
+      navigator.share({ title: 'Deed on Deeds', text: post.caption });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied!');
     }
   };
 
-  const categoryStr = post.category.__kind__;
-  const isJarPending = addToJar.isPending || removeFromJar.isPending;
+  const photoUrl = getPhotoUrl();
+  const videoUrl = getVideoUrl();
+  const timestamp = new Date(Number(post.timestamp) / 1_000_000).toLocaleDateString();
 
   return (
-    <>
-      <Card className="overflow-hidden">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setShowProfile(true)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-            >
-              <Avatar className="h-10 w-10">
-                {authorProfile?.profilePicture && (
-                  <AvatarImage
-                    src={authorProfile.profilePicture.getDirectURL()}
-                    alt={authorProfile.name}
-                  />
-                )}
-                <AvatarFallback>
-                  {authorProfile ? getInitials(authorProfile.name) : '?'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-left">
-                <p className="font-semibold">{authorProfile?.name || 'Anonymous'}</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-muted-foreground">{formatTimestamp(post.timestamp)}</p>
-                  <Badge variant="secondary" className="text-xs">
-                    {getCategoryLabel(categoryStr)}
-                  </Badge>
-                  {post.parentPostId && (
-                    <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-                      <Zap className="h-2.5 w-2.5 mr-1" />
-                      Inspired
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </button>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-5 w-5" />
-            </Button>
+    <article className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      {/* Author */}
+      <div className="flex items-center justify-between p-3 pb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+            <span className="text-sm font-bold text-primary">
+              {authorProfile?.name?.[0]?.toUpperCase() ?? '?'}
+            </span>
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4 pb-4 px-0">
-          {post.caption && (
-            <p className="text-base px-6">{post.caption}</p>
-          )}
-          {post.photo && (
-            <img
-              src={post.photo.getDirectURL()}
-              alt="Post"
-              className="w-full object-cover max-h-[600px]"
-            />
-          )}
-          {post.video && (
-            <video
-              src={post.video.getDirectURL()}
-              controls
-              className="w-full max-h-[600px]"
-            />
-          )}
-        </CardContent>
-
-        <CardFooter className="flex flex-col gap-3 pt-3 pb-4">
-          <div className="flex items-center justify-between w-full px-2">
-            <div className="flex gap-1 flex-wrap">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLike}
-                className={liked ? 'text-red-500' : ''}
-              >
-                <Heart className={`h-5 w-5 mr-1.5 ${liked ? 'fill-current' : ''}`} />
-                {Number(post.likes) + (liked ? 1 : 0)}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowComments(!showComments)}
-              >
-                <MessageCircle className="h-5 w-5 mr-1.5" />
-                {Number(post.comments)}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleShare}>
-                <Share2 className="h-5 w-5 mr-1.5" />
-                Share
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowInspireModal(true)}
-                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-              >
-                <Zap className="h-5 w-5 mr-1.5" />
-                Inspired
-              </Button>
-            </div>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowRippleChain(!showRippleChain)}
-                className="text-muted-foreground hover:text-amber-600"
-                title="View Ripple Chain"
-              >
-                <GitBranch className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMemoryJar}
-                disabled={isJarPending}
-                className={isInJar ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground hover:text-amber-500'}
-                title={isInJar ? 'Remove from Memory Jar' : 'Save to Memory Jar'}
-              >
-                {isJarPending ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                ) : isInJar ? (
-                  <BookmarkCheck className="h-4 w-4 fill-current" />
-                ) : (
-                  <BookmarkPlus className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground leading-none">
+              {authorProfile?.name ?? 'Anonymous'}
+            </p>
+            <p className="text-xs text-muted-foreground">{timestamp}</p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Category Badge */}
+          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${categoryColor}`}>
+            {categoryLabel}
+          </span>
+          <button className="text-muted-foreground hover:text-foreground transition-colors">
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
-          {showRippleChain && (
-            <div className="w-full px-2 pt-2 border-t border-amber-100">
-              <RippleChainView post={post} authorName={authorProfile?.name} />
-            </div>
-          )}
+      {/* Caption */}
+      <div className="px-3 pb-2">
+        <p className="text-sm text-foreground leading-relaxed">{post.caption}</p>
+      </div>
 
-          {showComments && <CommentsSection postId={post.id} />}
-        </CardFooter>
-      </Card>
-
-      {showProfile && (
-        <UserProfileModal userPrincipal={post.author} onClose={() => setShowProfile(false)} />
+      {/* Media */}
+      {photoUrl && (
+        <div className="mx-3 mb-2 rounded-lg overflow-hidden">
+          <img
+            src={photoUrl}
+            alt="Post"
+            className="w-full max-h-64 object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
+      {videoUrl && (
+        <div className="mx-3 mb-2 rounded-lg overflow-hidden">
+          <video
+            src={videoUrl}
+            className="w-full max-h-64 object-cover"
+            controls
+            preload="metadata"
+          />
+        </div>
       )}
 
-      {showInspireModal && (
-        <CreatePostModal
-          onClose={() => setShowInspireModal(false)}
-          parentPostId={post.id}
-          parentCaption={post.caption}
-          parentAuthorName={authorProfile?.name}
-        />
-      )}
-    </>
+      {/* Actions */}
+      <div className="flex items-center justify-between px-3 py-2 border-t border-border">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleLike}
+            disabled={isLiking}
+            className="flex items-center gap-1 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
+          >
+            <Heart className="w-4 h-4" />
+            <span className="text-xs">{Number(post.likes)}</span>
+          </button>
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="text-xs">{Number(post.comments)}</span>
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Save to Memory Jar */}
+        <button
+          onClick={handleSaveToJar}
+          disabled={isSaving}
+          className="flex items-center gap-1 text-muted-foreground hover:text-amber-500 transition-colors disabled:opacity-50"
+          title="Save to Memory Jar"
+        >
+          {isSaving ? (
+            <span className="w-4 h-4 border-2 border-muted-foreground/30 border-t-amber-500 rounded-full animate-spin" />
+          ) : (
+            <span className="text-base">🫙</span>
+          )}
+          <span className="text-xs">Save</span>
+        </button>
+      </div>
+
+      {/* Comments */}
+      {showComments && <CommentsSection postId={post.id} />}
+    </article>
   );
 }

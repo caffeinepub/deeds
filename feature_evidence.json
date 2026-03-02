@@ -2,112 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-build-a-ripple-effect-stories-ui-on-each-postcard-show-a-this-inspired-me-button-that-opens-a-ripple-post-creation-modal-pre-linked-to-the-parent-deed-display-the-ripple-chain-as-a-visual-tree-timeline-beneath-the-original-post-showing-how-kindness-spread-from-one-deed-to-many",
-      "featureTitle": "Build a Ripple Effect Stories UI: on each PostCard, show a 'This inspired me' button that opens a ripple post creation modal pre-linked to the parent deed. Display the ripple chain as a visual tree/timeline beneath the original post, showing how kindness spread from one deed to many.",
-      "files": [
-        "frontend/src/components/CreatePostModal.tsx",
-        "frontend/src/components/PostCard.tsx",
-        "frontend/src/components/RippleChainView.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@3.0.0",
-        "blob-storage@3.0.0",
-        "camera@1.0.0",
-        "http-outcalls@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-love-notes-to-strangers-page-accessible-from-the-main-navigation-show-a-warm-romantic-card-ui-where-authenticated-users-can-type-and-send-an-anonymous-note-display-received-notes-in-a-scrollable-inbox-styled-like-sealed-letter-envelopes-that-open-on-click-revealing-the-message-with-a-soft-animation",
-      "featureTitle": "Build a Love Notes to Strangers page accessible from the main navigation: show a warm, romantic card UI where authenticated users can type and send an anonymous note. Display received notes in a scrollable inbox styled like sealed letter envelopes that open on click, revealing the message with a soft animation.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/Header.tsx",
-        "frontend/src/components/LoveNoteCard.tsx",
-        "frontend/src/components/LoveNotes.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@3.0.0",
-        "blob-storage@3.0.0",
-        "camera@1.0.0",
-        "http-outcalls@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-deed-of-the-day-challenge-page-display-today-s-challenge-prompt-in-a-large-celebratory-hero-card-with-a-countdown-to-the-next-day-s-challenge-show-a-accept-complete-button-that-opens-the-post-creation-modal-pre-filled-with-the-challenge-context-below-the-hero-render-a-live-community-wall-of-everyone-who-has-completed-today-s-challenge-with-their-deed-posts-participant-count-and-a-progress-ring",
-      "featureTitle": "Build a Deed of the Day Challenge page: display today's challenge prompt in a large, celebratory hero card with a countdown to the next day's challenge. Show a 'Accept & Complete' button that opens the post creation modal pre-filled with the challenge context. Below the hero, render a live community wall of everyone who has completed today's challenge with their deed posts, participant count, and a progress ring.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/ChallengeCountdown.tsx",
-        "frontend/src/components/CreatePostModal.tsx",
-        "frontend/src/components/DeedOfTheDay.tsx",
-        "frontend/src/components/Header.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@3.0.0",
-        "blob-storage@3.0.0",
-        "camera@1.0.0",
-        "http-outcalls@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-kindness-matches-page-display-the-current-user-s-top-5-matched-users-as-profile-cards-with-a-compatibility-percentage-shared-deed-categories-and-the-reason-they-were-matched-include-a-say-hello-button-on-each-card-that-initiates-a-message-to-that-user-style-the-page-with-a-warm-heart-themed-romantic-aesthetic",
-      "featureTitle": "Build a Kindness Matches page: display the current user's top 5 matched users as profile cards with a compatibility percentage, shared deed categories, and the reason they were matched. Include a 'Say Hello 👋' button on each card that initiates a message to that user. Style the page with a warm, heart-themed romantic aesthetic.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/Header.tsx",
-        "frontend/src/components/KindnessMatchCard.tsx",
-        "frontend/src/components/KindnessMatches.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@3.0.0",
-        "blob-storage@3.0.0",
-        "camera@1.0.0",
-        "http-outcalls@3.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-a-memory-jar-ui-add-a-mason-jar-bookmark-icon-to-every-postcard-that-fills-animates-when-a-post-is-saved-create-a-dedicated-memory-jar-profile-section-accessible-from-the-profile-page-displaying-all-saved-posts-in-a-cozy-scrapbook-grid-layout-with-a-vintage-paper-warmth-aesthetic-show-a-count-badge-on-the-jar-icon-in-the-profile-nav",
-      "featureTitle": "Build a Memory Jar UI: add a mason-jar bookmark icon to every PostCard that fills/animates when a post is saved. Create a dedicated Memory Jar profile section (accessible from the Profile page) displaying all saved posts in a cozy scrapbook grid layout with a vintage paper/warmth aesthetic. Show a count badge on the jar icon in the profile nav.",
+      "featureId": "feature-fix-the-memory-jars-feature-so-it-appears-and-functions-correctly-users-can-save-deeds-from-others-into-a-personal-scrapbook-toggle-public-private-visibility-and-the-original-poster-is-notified-when-their-deed-is-saved",
+      "featureTitle": "Fix the Memory Jars feature so it appears and functions correctly: users can save deeds from others into a personal scrapbook, toggle public/private visibility, and the original poster is notified when their deed is saved.",
       "files": [
         "frontend/src/components/MemoryJarPostCard.tsx",
         "frontend/src/components/MemoryJarView.tsx",
@@ -127,16 +23,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-10"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-main-navigation-header-component-to-include-links-to-all-five-new-features-love-notes-deed-of-the-day-kindness-matches-and-memory-jar-memory-jar-also-accessible-from-profile-ensure-all-new-pages-are-registered-as-routes-in-app-tsx",
-      "featureTitle": "Update the main navigation (Header component) to include links to all five new features: Love Notes, Deed of the Day, Kindness Matches, and Memory Jar (Memory Jar also accessible from Profile). Ensure all new pages are registered as routes in App.tsx.",
+      "featureId": "feature-fix-the-profile-page-so-it-loads-and-displays-correctly-show-the-user-s-avatar-posts-albums-follower-following-counts-notifications-memory-jar-profile-picture-upload-option-and-status-update-option",
+      "featureTitle": "Fix the Profile page so it loads and displays correctly: show the user's avatar, posts, albums, follower/following counts, notifications, memory jar, profile picture upload option, and status update option.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/Header.tsx"
+        "frontend/src/components/Profile.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@3.0.0",
@@ -150,7 +46,101 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-11"
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-deed-categories-on-the-deeds-feed-page-implement-ai-style-random-category-assignment-so-that-when-a-user-creates-a-post-category-options-are-dynamically-generated-and-displayed-for-selection-rather-than-failing-to-load",
+      "featureTitle": "Fix deed categories on the Deeds/feed page: implement AI-style random category assignment so that when a user creates a post, category options are dynamically generated and displayed for selection rather than failing to load.",
+      "files": [
+        "frontend/src/components/CreatePostModal.tsx",
+        "frontend/src/components/PostCard.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-profile-report-card-feature-a-weekly-summary-card-on-the-user-s-profile-that-reflects-their-own-activity-stats-posts-made-deeds-completed-likes-received-etc-with-a-user-selectable-grading-scale-letter-grade-a-f-star-rating-1-5-or-percentage-0-100-the-report-card-has-a-public-private-toggle",
+      "featureTitle": "Implement the Profile Report Card feature: a weekly summary card on the user's profile that reflects their own activity stats (posts made, deeds completed, likes received, etc.) with a user-selectable grading scale (letter grade A-F, star rating 1-5, or percentage 0-100%). The report card has a public/private toggle.",
+      "files": [
+        "frontend/src/components/Profile.tsx",
+        "frontend/src/components/ReportCard.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-deeds-bar-on-the-profile-page-a-19-hour-daily-activity-tracker-displayed-only-on-the-profile-page-showing-floating-bear-pineapple-and-monkey-head-icons-against-a-light-baby-blue-lightning-bolt-background-tracking-daily-app-usage-progress",
+      "featureTitle": "Implement the Deeds Bar on the profile page: a 19-hour daily activity tracker displayed only on the profile page, showing floating bear, pineapple, and monkey head icons against a light baby blue lightning-bolt background, tracking daily app usage progress.",
+      "files": [
+        "frontend/src/components/DeedsBar.tsx",
+        "frontend/src/components/Profile.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-lock-screen-overlay-that-appears-on-every-page-when-the-user-reaches-the-19-hour-daily-usage-limit-the-overlay-displays-a-message-about-the-daily-limit-and-requires-the-user-to-click-any-bold-letter-in-the-terms-acceptance-text-to-dismiss-and-continue",
+      "featureTitle": "Implement a lock screen overlay that appears on every page when the user reaches the 19-hour daily usage limit. The overlay displays a message about the daily limit and requires the user to click any bold letter in the terms/acceptance text to dismiss and continue.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/LockScreenOverlay.tsx"
+      ],
+      "components": [
+        "authorization@3.0.0",
+        "blob-storage@3.0.0",
+        "camera@1.0.0",
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
       ],
       "confidence": "high"
     }

@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Button } from './ui/button';
-import { Radio, Video, VideoOff, Mic, MicOff, X } from 'lucide-react';
-import { useCreateLiveSession, useEndLiveSession } from '../hooks/useQueries';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useStartLiveSession, useEndLiveSession } from '../hooks/useQueries';
+import { Radio, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import LiveChatPanel from './LiveChatPanel';
 
 interface StartLiveModalProps {
   onClose: () => void;
@@ -13,161 +12,110 @@ interface StartLiveModalProps {
 export default function StartLiveModal({ onClose }: StartLiveModalProps) {
   const [isLive, setIsLive] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [videoEnabled, setVideoEnabled] = useState(true);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-  
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
 
-  const startLiveMutation = useCreateLiveSession();
-  const endLiveMutation = useEndLiveSession();
+  const startSession = useStartLiveSession();
+  const endSession = useEndLiveSession();
 
-  useEffect(() => {
-    startCamera();
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
-  const startCamera = async () => {
+  const handleStart = async () => {
+    setIsStarting(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      toast.error('Failed to access camera. Please check permissions.');
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-  };
-
-  const toggleVideo = () => {
-    if (streamRef.current) {
-      const videoTrack = streamRef.current.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        setVideoEnabled(videoTrack.enabled);
-      }
-    }
-  };
-
-  const toggleAudio = () => {
-    if (streamRef.current) {
-      const audioTrack = streamRef.current.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        setAudioEnabled(audioTrack.enabled);
-      }
-    }
-  };
-
-  const startLive = async () => {
-    try {
-      const streamId = `stream-${Date.now()}`;
-      const result = await startLiveMutation.mutateAsync({ streamId });
-      const newSessionId = result?.id || `session-${Date.now()}`;
-      setSessionId(newSessionId);
+      const streamId = `stream_${Date.now()}`;
+      const result = await startSession.mutateAsync({ streamId });
+      const id = typeof result === 'string' ? result : (result as any)?.id ?? streamId;
+      setSessionId(id);
       setIsLive(true);
-      toast.success('You are now live!');
-    } catch (error: any) {
-      console.error('Error starting live session:', error);
-      toast.error(error.message || 'Failed to start live session');
+      toast.success('You are now live! 🔴');
+    } catch {
+      toast.error('Failed to start live session');
+    } finally {
+      setIsStarting(false);
     }
   };
 
-  const endLive = async () => {
+  const handleStop = async () => {
     if (!sessionId) return;
-
+    setIsStopping(true);
     try {
-      await endLiveMutation.mutateAsync(sessionId);
-      setIsLive(false);
+      await endSession.mutateAsync(sessionId);
       toast.success('Live session ended');
-      handleClose();
-    } catch (error: any) {
-      console.error('Error ending live session:', error);
-      toast.error(error.message || 'Failed to end live session');
+      onClose();
+    } catch {
+      toast.error('Failed to end live session');
+    } finally {
+      setIsStopping(false);
     }
-  };
-
-  const handleClose = () => {
-    stopCamera();
-    onClose();
   };
 
   return (
-    <Dialog open onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden p-0">
-        <div className="grid md:grid-cols-[1fr,300px] h-full">
-          <div className="relative bg-black">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-            {isLive && (
-              <div className="absolute top-4 left-4 z-10">
-                <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2 animate-pulse">
-                  <div className="h-2 w-2 rounded-full bg-white" />
-                  LIVE
+    <Dialog open={true} onOpenChange={(open) => !open && !isLive && onClose()}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Radio className="w-5 h-5 text-red-500" />
+            {isLive ? 'You are Live!' : 'Go Live'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {isLive ? (
+            <>
+              <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                  <span className="font-bold text-red-600">LIVE</span>
                 </div>
+                <p className="text-sm text-muted-foreground">Your stream is active</p>
               </div>
-            )}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+
               <Button
-                size="icon"
-                variant={videoEnabled ? 'default' : 'destructive'}
-                onClick={toggleVideo}
-                className="rounded-full"
+                variant="destructive"
+                className="w-full"
+                onClick={handleStop}
+                disabled={isStopping}
               >
-                {videoEnabled ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+                {isStopping ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Ending...
+                  </span>
+                ) : (
+                  <>
+                    <StopCircle className="w-4 h-4 mr-2" />
+                    End Stream
+                  </>
+                )}
               </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground text-center">
+                Start a live stream to share your deeds in real time with your followers.
+              </p>
+
               <Button
-                size="icon"
-                variant={audioEnabled ? 'default' : 'destructive'}
-                onClick={toggleAudio}
-                className="rounded-full"
+                className="w-full"
+                onClick={handleStart}
+                disabled={isStarting}
               >
-                {audioEnabled ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                {isStarting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    Starting...
+                  </span>
+                ) : (
+                  <>
+                    <Radio className="w-4 h-4 mr-2" />
+                    Go Live Now
+                  </>
+                )}
               </Button>
-              {!isLive ? (
-                <Button
-                  onClick={startLive}
-                  disabled={startLiveMutation.isPending}
-                  className="gap-2 rounded-full"
-                >
-                  <Radio className="h-4 w-4" />
-                  {startLiveMutation.isPending ? 'Starting...' : 'Go Live'}
-                </Button>
-              ) : (
-                <Button
-                  onClick={endLive}
-                  disabled={endLiveMutation.isPending}
-                  variant="destructive"
-                  className="gap-2 rounded-full"
-                >
-                  <X className="h-4 w-4" />
-                  {endLiveMutation.isPending ? 'Ending...' : 'End Live'}
-                </Button>
-              )}
-            </div>
-          </div>
-          {isLive && sessionId && (
-            <div className="bg-background border-l">
-              <LiveChatPanel sessionId={sessionId} />
-            </div>
+
+              <Button variant="outline" className="w-full" onClick={onClose}>
+                Cancel
+              </Button>
+            </>
           )}
         </div>
       </DialogContent>

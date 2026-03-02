@@ -1,10 +1,9 @@
-import { useGetUserProfile } from '../hooks/useQueries';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
+import React from 'react';
+import { useGetUserProfile, type KindnessMatch } from '../hooks/useQueries';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Heart, MessageSquare } from 'lucide-react';
-import { Principal } from '@icp-sdk/core/principal';
-import type { KindnessMatch } from '../backend';
 import { useNavigate } from '@tanstack/react-router';
 
 interface KindnessMatchCardProps {
@@ -13,11 +12,23 @@ interface KindnessMatchCardProps {
 }
 
 export default function KindnessMatchCard({ match, index }: KindnessMatchCardProps) {
-  const { data: profile } = useGetUserProfile(match.withUser);
+  const withUserPrincipal = match.withUser?.toString() ?? null;
+  const { data: profile } = useGetUserProfile(withUserPrincipal);
   const navigate = useNavigate();
 
-  const getInitials = (name: string) =>
-    name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const getAvatarUrl = () => {
+    if (profile?.profilePicture && profile.profilePicture.__kind__ === 'Some') {
+      try {
+        const blob = profile.profilePicture.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return undefined;
+  };
 
   const getCategoryLabel = (category: any) => {
     const kind = typeof category === 'string' ? category : category?.__kind__;
@@ -38,21 +49,14 @@ export default function KindnessMatchCard({ match, index }: KindnessMatchCardPro
   return (
     <div
       className="rounded-2xl border border-pink-200 bg-gradient-to-br from-white to-pink-50 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-5 space-y-4"
-      style={{
-        animationDelay: `${index * 100}ms`,
-        animation: 'fadeSlideUp 0.5s ease forwards',
-        opacity: 0,
-      }}
     >
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="relative">
           <Avatar className="h-14 w-14 ring-2 ring-pink-200">
-            {profile?.profilePicture && (
-              <AvatarImage src={profile.profilePicture.getDirectURL()} alt={profile.name} />
-            )}
+            <AvatarImage src={getAvatarUrl()} alt={profile?.name} />
             <AvatarFallback className="bg-pink-100 text-pink-700 text-lg font-bold">
-              {profile ? getInitials(profile.name) : '?'}
+              {profile?.name?.[0]?.toUpperCase() ?? '?'}
             </AvatarFallback>
           </Avatar>
           <div className="absolute -bottom-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -60,8 +64,8 @@ export default function KindnessMatchCard({ match, index }: KindnessMatchCardPro
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-base truncate">{profile?.name || 'Kind Soul'}</p>
-          <p className="text-xs text-muted-foreground line-clamp-1">{profile?.bio || 'A fellow deed-doer'}</p>
+          <p className="font-bold text-base truncate">{profile?.name ?? 'Kind Soul'}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1">{profile?.bio ?? 'A fellow deed-doer'}</p>
         </div>
         <Heart className="h-5 w-5 text-pink-400 fill-pink-200 shrink-0" />
       </div>
@@ -81,7 +85,7 @@ export default function KindnessMatchCard({ match, index }: KindnessMatchCardPro
       </div>
 
       {/* Shared Categories */}
-      {match.sharedCategories.length > 0 && (
+      {match.sharedCategories && match.sharedCategories.length > 0 && (
         <div className="space-y-1.5">
           <p className="text-xs font-semibold text-pink-600 uppercase tracking-wider">Shared Passions</p>
           <div className="flex flex-wrap gap-1.5">

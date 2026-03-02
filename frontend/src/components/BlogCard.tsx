@@ -1,210 +1,137 @@
-import { useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Button } from './ui/button';
-import { Heart, MessageCircle, Image as ImageIcon, Video, Music } from 'lucide-react';
-import { useGetUserProfile, type Blog } from '../hooks/useQueries';
-import { Badge } from './ui/badge';
-import UserProfileModal from './UserProfileModal';
+import React, { useState } from 'react';
+import { Heart, MessageCircle, Share2, Tag, Calendar } from 'lucide-react';
+import { Blog, useGetUserProfile } from '../hooks/useQueries';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 interface BlogCardProps {
   blog: Blog;
 }
 
 export default function BlogCard({ blog }: BlogCardProps) {
-  const [showProfile, setShowProfile] = useState(false);
-  const [showFullContent, setShowFullContent] = useState(false);
-  const { data: authorProfile } = useGetUserProfile(blog.author);
+  const authorPrincipal = blog.author?.toString() ?? null;
+  const { data: authorProfile } = useGetUserProfile(authorPrincipal);
+  const [liked, setLiked] = useState(false);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const getAvatarUrl = () => {
+    if (authorProfile?.profilePicture && authorProfile.profilePicture.__kind__ === 'Some') {
+      try {
+        const blob = authorProfile.profilePicture.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return undefined;
   };
 
-  const formatTimestamp = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1000000);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+  const getMediaUrl = (mediaItem: any): string | null => {
+    if (!mediaItem) return null;
+    if (typeof mediaItem.getDirectURL === 'function') {
+      return mediaItem.getDirectURL();
+    }
+    return null;
   };
 
-  const truncateContent = (content: string, maxLength: number) => {
-    if (content.length <= maxLength) return content;
-    return content.slice(0, maxLength) + '...';
+  const timestamp = new Date(Number(blog.timestamp) / 1_000_000).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied!');
   };
-
-  const hasImages = blog.media.some((m) => {
-    const url = m.getDirectURL();
-    return url.includes('image') || url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-  });
-
-  const hasVideos = blog.media.some((m) => {
-    const url = m.getDirectURL();
-    return url.includes('video') || url.match(/\.(mp4|mov|avi|webm)$/i);
-  });
-
-  const hasAudio = blog.media.some((m) => {
-    const url = m.getDirectURL();
-    return url.includes('audio') || url.match(/\.(mp3|wav|ogg)$/i);
-  });
 
   return (
-    <>
-      <Card className="overflow-hidden bg-white/95 backdrop-blur transition-all hover:shadow-lg">
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <button
-              onClick={() => setShowProfile(true)}
-              className="flex items-center gap-3 transition-all hover:opacity-80 active:scale-95"
-            >
-              <Avatar className="h-11 w-11 ring-2 ring-transparent hover:ring-primary/20 transition-all">
-                {authorProfile?.profilePicture && (
-                  <AvatarImage
-                    src={authorProfile.profilePicture.getDirectURL()}
-                    alt={authorProfile.name}
-                  />
-                )}
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {authorProfile ? getInitials(authorProfile.name) : '?'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-left">
-                <p className="font-semibold text-base">{authorProfile?.name || 'Anonymous'}</p>
-                <p className="text-xs text-muted-foreground">{formatTimestamp(blog.timestamp)}</p>
-              </div>
-            </button>
-            <div className="flex gap-2">
-              {blog.isLive && (
-                <Badge variant="destructive" className="animate-pulse px-3 py-1">
-                  LIVE
-                </Badge>
-              )}
-              {hasImages && (
-                <Badge variant="secondary" className="flex items-center gap-1 px-2">
-                  <ImageIcon className="h-3 w-3" />
-                </Badge>
-              )}
-              {hasVideos && (
-                <Badge variant="secondary" className="flex items-center gap-1 px-2">
-                  <Video className="h-3 w-3" />
-                </Badge>
-              )}
-              {hasAudio && (
-                <Badge variant="secondary" className="flex items-center gap-1 px-2">
-                  <Music className="h-3 w-3" />
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4 pb-4">
-          <h3 className="text-xl font-bold tracking-tight">{blog.title}</h3>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-            {showFullContent ? blog.content : truncateContent(blog.content, 200)}
-          </p>
-          {blog.content.length > 200 && (
-            <Button
-              variant="link"
-              size="sm"
-              onClick={() => setShowFullContent(!showFullContent)}
-              className="p-0 h-auto font-medium transition-all hover:text-primary"
-            >
-              {showFullContent ? 'Show less' : 'Read more'}
-            </Button>
-          )}
-
-          {blog.media.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
-              {blog.media.slice(0, 4).map((media, idx) => {
-                const url = media.getDirectURL();
-                const isVideo = url.includes('video') || url.match(/\.(mp4|mov|avi|webm)$/i);
-                const isAudio = url.includes('audio') || url.match(/\.(mp3|wav|ogg)$/i);
-
-                if (isVideo) {
-                  return (
-                    <video
-                      key={idx}
-                      src={url}
-                      controls
-                      className="w-full rounded-lg object-cover max-h-48 transition-transform hover:scale-[1.02]"
-                      preload="metadata"
-                    />
-                  );
-                } else if (isAudio) {
-                  return (
-                    <div key={idx} className="col-span-2">
-                      <audio src={url} controls className="w-full" />
-                    </div>
-                  );
-                } else {
-                  return (
-                    <img
-                      key={idx}
-                      src={url}
-                      alt="Blog media"
-                      className="w-full rounded-lg object-cover max-h-48 transition-transform hover:scale-[1.02]"
-                    />
-                  );
-                }
-              })}
-            </div>
-          )}
-
-          {blog.categories.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {blog.categories.map((category, idx) => (
-                <Badge key={idx} variant="outline" className="px-3 py-1 transition-all hover:bg-accent">
-                  {category}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {blog.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {blog.tags.map((tag, idx) => (
-                <span key={idx} className="text-xs text-primary font-medium transition-all hover:text-primary/80">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </CardContent>
-
-        <CardFooter className="flex items-center justify-between border-t pt-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 transition-all hover:bg-primary/10 hover:text-primary active:scale-95"
-            >
-              <Heart className="h-4 w-4" />
-              <span className="font-medium">{Number(blog.likes)}</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="gap-2 transition-all hover:bg-primary/10 hover:text-primary active:scale-95">
-              <MessageCircle className="h-4 w-4" />
-              <span className="font-medium">{Number(blog.comments)}</span>
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-
-      {showProfile && (
-        <UserProfileModal userPrincipal={blog.author} onClose={() => setShowProfile(false)} />
+    <article className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      {/* Media */}
+      {blog.media && blog.media.length > 0 && getMediaUrl(blog.media[0]) && (
+        <div className="h-48 overflow-hidden">
+          <img
+            src={getMediaUrl(blog.media[0])!}
+            alt={blog.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
       )}
-    </>
+
+      <div className="p-4">
+        {/* Author */}
+        <div className="flex items-center gap-2 mb-3">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={getAvatarUrl()} alt={authorProfile?.name} />
+            <AvatarFallback className="text-xs">
+              {authorProfile?.name?.[0]?.toUpperCase() ?? '?'}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-semibold text-foreground leading-none">
+              {authorProfile?.name ?? 'Anonymous'}
+            </p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <Calendar className="w-3 h-3 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">{timestamp}</p>
+            </div>
+          </div>
+          {blog.isLive && (
+            <Badge variant="destructive" className="ml-auto text-xs">
+              LIVE
+            </Badge>
+          )}
+        </div>
+
+        {/* Title */}
+        <h3 className="font-bold text-foreground text-base mb-2 line-clamp-2">{blog.title}</h3>
+
+        {/* Content preview */}
+        <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{blog.content}</p>
+
+        {/* Categories & Tags */}
+        {(blog.categories.length > 0 || blog.tags.length > 0) && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {blog.categories.slice(0, 2).map((cat) => (
+              <Badge key={cat} variant="secondary" className="text-xs">
+                {cat}
+              </Badge>
+            ))}
+            {blog.tags.slice(0, 2).map((tag) => (
+              <span key={tag} className="text-xs text-primary flex items-center gap-0.5">
+                <Tag className="w-2.5 h-2.5" />
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 pt-2 border-t border-border">
+          <button
+            onClick={() => setLiked(!liked)}
+            className={`flex items-center gap-1 text-sm transition-colors ${
+              liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
+            <span>{Number(blog.likes) + (liked ? 1 : 0)}</span>
+          </button>
+          <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <MessageCircle className="w-4 h-4" />
+            <span>{Number(blog.comments)}</span>
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors ml-auto"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }

@@ -1,30 +1,47 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import {
-  useGetTodaysChallenge,
-  useGetChallengeCompletions,
-  useGetUserChallengeCompletions,
+  useGetDailyChallenge,
   useGetUserProfile,
+  type DailyChallenge,
+  type KindnessMatch,
 } from '../hooks/useQueries';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Star, Users, Trophy, Flame } from 'lucide-react';
-import { toast } from 'sonner';
-import ChallengeCountdown from './ChallengeCountdown';
 import CreatePostModal from './CreatePostModal';
-import { Principal } from '@icp-sdk/core/principal';
-import type { ChallengeCompletion } from '../backend';
+
+// Local type for challenge completion (not from backend)
+interface ChallengeCompletion {
+  id: string;
+  user: any;
+  challengeId: string;
+  postId: string;
+  timestamp: bigint;
+}
 
 function CompletionCard({ completion }: { completion: ChallengeCompletion }) {
-  const { data: profile } = useGetUserProfile(completion.user);
+  const authorPrincipal = completion.user?.toString() ?? null;
+  const { data: profile } = useGetUserProfile(authorPrincipal);
 
-  const getInitials = (name: string) =>
-    name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const getAvatarUrl = () => {
+    if (profile?.profilePicture && profile.profilePicture.__kind__ === 'Some') {
+      try {
+        const blob = profile.profilePicture.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return undefined;
+  };
 
   const formatTimestamp = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1000000);
+    const date = new Date(Number(timestamp) / 1_000_000);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -38,15 +55,13 @@ function CompletionCard({ completion }: { completion: ChallengeCompletion }) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-yellow-100 shadow-sm">
       <Avatar className="h-10 w-10 shrink-0">
-        {profile?.profilePicture && (
-          <AvatarImage src={profile.profilePicture.getDirectURL()} alt={profile.name} />
-        )}
+        <AvatarImage src={getAvatarUrl()} alt={profile?.name} />
         <AvatarFallback className="bg-yellow-100 text-yellow-700 text-sm">
-          {profile ? getInitials(profile.name) : '?'}
+          {profile?.name?.[0]?.toUpperCase() ?? '?'}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm truncate">{profile?.name || 'Anonymous'}</p>
+        <p className="font-semibold text-sm truncate">{profile?.name ?? 'Anonymous'}</p>
         <p className="text-xs text-muted-foreground">{formatTimestamp(completion.timestamp)}</p>
       </div>
       <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 shrink-0" />
@@ -56,15 +71,14 @@ function CompletionCard({ completion }: { completion: ChallengeCompletion }) {
 
 export default function DeedOfTheDay() {
   const { identity } = useInternetIdentity();
-  const currentUserPrincipal = identity?.getPrincipal();
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
-  const { data: challenge, isLoading: challengeLoading } = useGetTodaysChallenge();
-  const { data: completions, isLoading: completionsLoading } = useGetChallengeCompletions(challenge?.id ?? null);
-  const { data: userCompletions } = useGetUserChallengeCompletions(currentUserPrincipal ?? null);
+  const { data: challenge, isLoading: challengeLoading } = useGetDailyChallenge();
 
-  const hasCompleted = userCompletions?.some(c => c.challengeId === challenge?.id) ?? false;
-  const participantCount = completions?.length ?? 0;
+  // Completions are not yet backed by real data — use empty arrays
+  const completions: ChallengeCompletion[] = [];
+  const hasCompleted = false;
+  const participantCount = completions.length;
 
   const getCategoryLabel = (category: any) => {
     const kind = typeof category === 'string' ? category : category?.__kind__;
@@ -153,13 +167,7 @@ export default function DeedOfTheDay() {
                 </div>
               </div>
 
-              {/* Countdown */}
-              <div className="bg-white/70 rounded-xl p-4 border border-amber-100">
-                <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">Time Remaining</p>
-                <ChallengeCountdown />
-              </div>
-
-              {/* Progress ring (visual) */}
+              {/* Progress bar */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 bg-amber-100 rounded-full h-3 overflow-hidden">
                   <div
@@ -201,11 +209,7 @@ export default function DeedOfTheDay() {
               </span>
             </div>
 
-            {completionsLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
-              </div>
-            ) : !completions || completions.length === 0 ? (
+            {completions.length === 0 ? (
               <Card className="border-yellow-100 bg-yellow-50/50">
                 <CardContent className="py-12 text-center">
                   <div className="text-4xl mb-3">🌱</div>
@@ -215,22 +219,19 @@ export default function DeedOfTheDay() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[...completions]
-                  .sort((a, b) => Number(b.timestamp - a.timestamp))
-                  .map(completion => (
-                    <CompletionCard key={completion.id} completion={completion} />
-                  ))}
+                {completions.map((completion) => (
+                  <CompletionCard key={completion.id} completion={completion} />
+                ))}
               </div>
             )}
           </div>
         </>
       )}
 
-      {showCompleteModal && challenge && (
+      {showCompleteModal && (
         <CreatePostModal
+          isOpen={showCompleteModal}
           onClose={() => setShowCompleteModal(false)}
-          challengeId={challenge.id}
-          challengePrompt={challenge.prompt}
         />
       )}
     </div>

@@ -1,23 +1,21 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useSendLoveNote, useGetMyLoveNotes } from '../hooks/useQueries';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useSendLoveNote, useGetLoveNotes } from '../hooks/useQueries';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Send, Heart, Inbox } from 'lucide-react';
 import { toast } from 'sonner';
 import LoveNoteCard from './LoveNoteCard';
-import { Principal } from '@icp-sdk/core/principal';
 
-// A pool of anonymous recipient principals for demo purposes
-// In production, the backend would handle random recipient selection
-const ANONYMOUS_RECIPIENT = Principal.fromText('2vxsx-fae');
+// Anonymous recipient principal string for demo purposes
+const ANONYMOUS_RECIPIENT = '2vxsx-fae';
 
 export default function LoveNotes() {
   const { identity } = useInternetIdentity();
   const [message, setMessage] = useState('');
   const sendNote = useSendLoveNote();
-  const { data: myNotes, isLoading: notesLoading } = useGetMyLoveNotes();
+  const { data: myNotes, isLoading: notesLoading } = useGetLoveNotes();
 
   const MAX_CHARS = 280;
   const remaining = MAX_CHARS - message.length;
@@ -37,7 +35,6 @@ export default function LoveNotes() {
     if (!message.trim()) return;
 
     try {
-      // Send to a random/anonymous recipient
       await sendNote.mutateAsync({
         recipient: ANONYMOUS_RECIPIENT,
         message: message.trim(),
@@ -47,7 +44,6 @@ export default function LoveNotes() {
         description: 'Someone out there just received a little warmth from you.',
       });
     } catch (error) {
-      console.error('Error sending love note:', error);
       toast.error('Failed to send love note. Please try again.');
     }
   };
@@ -91,7 +87,7 @@ export default function LoveNotes() {
                 onChange={(e) => setMessage(e.target.value.slice(0, MAX_CHARS))}
                 placeholder="Write something kind, uplifting, or simply warm... Your note will be sent anonymously to a stranger who needs it. 💕"
                 rows={5}
-                className="resize-none border-rose-200 focus:border-rose-400 focus:ring-rose-300 bg-white/80"
+                className="resize-none border-rose-200 focus:border-rose-400 bg-white/80"
               />
               <div className={`absolute bottom-3 right-3 text-xs font-medium ${remaining < 30 ? 'text-red-500' : 'text-muted-foreground'}`}>
                 {remaining}
@@ -118,11 +114,11 @@ export default function LoveNotes() {
         </CardContent>
       </Card>
 
-      {/* Inbox */}
+      {/* Received Notes */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Inbox className="h-5 w-5 text-rose-500" />
-          <h2 className="text-xl font-bold text-rose-700">Your Love Notes Inbox</h2>
+          <h2 className="text-xl font-bold text-rose-700">Notes You've Received</h2>
           {myNotes && myNotes.length > 0 && (
             <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full">
               {myNotes.length}
@@ -131,24 +127,22 @@ export default function LoveNotes() {
         </div>
 
         {notesLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-rose-400" />
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-rose-400" />
           </div>
         ) : !myNotes || myNotes.length === 0 ? (
-          <Card className="border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50">
-            <CardContent className="py-16 text-center space-y-4">
-              <div className="text-6xl">📭</div>
-              <div>
-                <p className="font-semibold text-rose-600 text-lg">Your inbox is empty</p>
-                <p className="text-muted-foreground text-sm mt-2 max-w-xs mx-auto">
-                  Love notes from kind strangers will appear here. The universe is preparing something warm for you! 💕
-                </p>
-              </div>
+          <Card className="border-rose-100 bg-rose-50/50">
+            <CardContent className="py-12 text-center">
+              <div className="text-4xl mb-3">💌</div>
+              <p className="font-semibold text-rose-600">No notes yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                When someone sends you a love note, it will appear here.
+              </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[...myNotes].sort((a, b) => Number(b.timestamp - a.timestamp)).map(note => (
+            {myNotes.map((note) => (
               <LoveNoteCard key={note.id} note={note} />
             ))}
           </div>

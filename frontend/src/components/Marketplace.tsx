@@ -1,151 +1,76 @@
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Button } from './ui/button';
-import { PlusCircle, Filter } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { useGetAllMarketplacePosts, type Variant_offer_need } from '../hooks/useQueries';
+import React, { useState } from 'react';
+import { useGetMarketplacePosts, type Variant_offer_need } from '../hooks/useQueries';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ShoppingBag, Plus, Filter } from 'lucide-react';
 import MarketplaceCard from './MarketplaceCard';
 import CreateMarketplacePostModal from './CreateMarketplacePostModal';
 import SkeletonMarketplace from './SkeletonMarketplace';
 
-type SortFilter = 'newest' | 'closest' | 'popular';
+type FilterType = 'all' | 'need' | 'offer';
 
 export default function Marketplace() {
-  const [activeTab, setActiveTab] = useState<'all' | 'needs' | 'offers'>('all');
+  const { data: posts = [], isLoading } = useGetMarketplacePosts();
+  const [filter, setFilter] = useState<FilterType>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [filter, setFilter] = useState<SortFilter>('newest');
 
-  const { data: allPosts, isLoading, error } = useGetAllMarketplacePosts();
-
-  const filterByType = (posts: any[] | undefined) => {
-    if (!posts) return [];
-    if (activeTab === 'all') return posts;
-    if (activeTab === 'needs') {
-      return posts.filter(p => p.postType.__kind__ === 'need');
-    }
-    return posts.filter(p => p.postType.__kind__ === 'offer');
-  };
-
-  const sortPosts = (posts: any[]) => {
-    const sorted = [...posts];
-    
-    switch (filter) {
-      case 'newest':
-        return sorted.sort((a, b) => Number(b.timestamp - a.timestamp));
-      case 'popular':
-        return sorted.sort((a, b) => Number(b.savedCount - a.savedCount));
-      case 'closest':
-        return sorted;
-      default:
-        return sorted;
-    }
-  };
-
-  const displayPosts = sortPosts(filterByType(allPosts));
-
-  if (error) {
-    return (
-      <div className="container py-8 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card className="shadow-md border">
-          <CardContent className="py-16 text-center space-y-4">
-            <p className="text-destructive">Error loading marketplace posts</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const filteredPosts = posts.filter((post) => {
+    if (filter === 'all') return true;
+    return post.postType?.__kind__ === filter;
+  });
 
   return (
-    <div className="container py-6 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Header Section - Improved spacing and alignment */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-4">
-          <img 
-            src="/assets/generated/marketplace-icon-professional-transparent.dim_64x64.png" 
-            alt="Marketplace" 
-            className="h-12 w-12 sm:h-14 sm:w-14 drop-shadow-lg flex-shrink-0"
-          />
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold premium-title">Marketplace</h1>
-            <p className="text-muted-foreground text-sm sm:text-base mt-1">Connect through needs and offers</p>
-          </div>
+    <div className="max-w-2xl mx-auto p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <ShoppingBag className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-bold text-foreground">Marketplace</h1>
         </div>
-        <Button 
-          onClick={() => setShowCreateModal(true)}
-          size="lg"
-          className="gap-2 shadow-md hover:shadow-lg transition-all duration-300 rounded-xl px-6 py-3 w-full sm:w-auto"
-        >
-          <PlusCircle className="h-5 w-5" />
-          <span className="font-bold">Create Post</span>
+        <Button size="sm" onClick={() => setShowCreateModal(true)} className="text-xs">
+          <Plus className="w-3 h-3 mr-1" />
+          Post
         </Button>
       </div>
 
-      {/* Tabs and Filter Section - Better responsive layout */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full lg:w-auto">
-          <TabsList className="grid w-full lg:w-auto grid-cols-3 h-12 rounded-xl shadow-sm">
-            <TabsTrigger value="all" className="gap-2 font-bold text-sm sm:text-base rounded-lg px-4">
-              All
-            </TabsTrigger>
-            <TabsTrigger value="needs" className="gap-2 font-bold text-sm sm:text-base rounded-lg px-4">
-              <img src="/assets/generated/needs-icon-professional-transparent.dim_48x48.png" alt="" className="h-4 w-4" />
-              Needs
-            </TabsTrigger>
-            <TabsTrigger value="offers" className="gap-2 font-bold text-sm sm:text-base rounded-lg px-4">
-              <img src="/assets/generated/offers-icon-red-transparent.dim_48x48.png" alt="" className="h-4 w-4" />
-              Offers
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="flex items-center gap-3 w-full lg:w-auto">
-          <Filter className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-          <Select value={filter} onValueChange={(v) => setFilter(v as SortFilter)}>
-            <SelectTrigger className="w-full lg:w-[180px] h-12 rounded-xl shadow-sm">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="closest">Closest</SelectItem>
-              <SelectItem value="popular">Popular</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Filters */}
+      <div className="flex gap-2 mb-4">
+        {(['all', 'need', 'offer'] as FilterType[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${
+              filter === f
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-foreground border-border hover:border-primary/50'
+            }`}
+          >
+            {f === 'all' ? 'All' : f === 'need' ? 'Needs' : 'Offers'}
+          </button>
+        ))}
       </div>
 
-      {/* Content Section - Improved grid layout and spacing */}
       {isLoading ? (
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
             <SkeletonMarketplace key={i} />
           ))}
         </div>
-      ) : displayPosts.length === 0 ? (
-        <Card className="shadow-md border">
-          <CardContent className="py-16 text-center space-y-4">
-            <img
-              src="/assets/generated/marketplace-icon-professional-transparent.dim_64x64.png"
-              alt="No posts"
-              className="mx-auto mb-4 h-16 w-16 opacity-50"
-            />
-            <h3 className="text-xl font-bold">No marketplace posts yet</h3>
-            <p className="text-muted-foreground">
-              Be the first to share a {activeTab === 'needs' ? 'need' : activeTab === 'offers' ? 'offer' : 'post'}!
-            </p>
-            <Button 
-              onClick={() => setShowCreateModal(true)}
-              size="lg"
-              className="gap-2 shadow-md hover:shadow-lg transition-all duration-300 rounded-xl px-6 mt-4"
-            >
-              <PlusCircle className="h-5 w-5" />
-              <span className="font-bold">Create Post</span>
-            </Button>
-          </CardContent>
-        </Card>
+      ) : filteredPosts.length === 0 ? (
+        <div className="text-center py-16">
+          <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="font-medium text-foreground">No posts yet</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {filter === 'all'
+              ? 'Be the first to post a need or offer!'
+              : `No ${filter}s posted yet.`}
+          </p>
+          <Button className="mt-4" size="sm" onClick={() => setShowCreateModal(true)}>
+            Create Post
+          </Button>
+        </div>
       ) : (
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 auto-rows-fr">
-          {displayPosts.map((post) => (
+        <div className="grid grid-cols-2 gap-3">
+          {filteredPosts.map((post) => (
             <MarketplaceCard key={post.id} post={post} />
           ))}
         </div>

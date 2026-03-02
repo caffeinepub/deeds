@@ -1,13 +1,13 @@
+import React from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetTopMatches } from '../hooks/useQueries';
-import { Card, CardContent } from './ui/card';
+import { useGetKindnessMatches } from '../hooks/useQueries';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Heart, Sparkles } from 'lucide-react';
 import KindnessMatchCard from './KindnessMatchCard';
 
 export default function KindnessMatches() {
   const { identity } = useInternetIdentity();
-  const currentUserPrincipal = identity?.getPrincipal();
-  const { data: matches, isLoading } = useGetTopMatches(currentUserPrincipal ?? null);
+  const { data: matches, isLoading } = useGetKindnessMatches();
 
   if (!identity) {
     return (
@@ -78,18 +78,11 @@ export default function KindnessMatches() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {matches.map((match, index) => (
-              <KindnessMatchCard key={match.withUser.toString()} match={match} index={index} />
+              <KindnessMatchCard key={index} match={match} index={index} />
             ))}
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

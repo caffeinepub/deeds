@@ -1,155 +1,139 @@
-import { useState } from 'react';
-import { useGetActiveLiveSessions, useGetUserProfile, type LiveSession } from '../hooks/useQueries';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Radio, Users, Eye } from 'lucide-react';
+import React, { useState } from 'react';
+import { useGetLiveSessions, useGetUserProfile, type LiveSession } from '../hooks/useQueries';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Radio, Users, Play } from 'lucide-react';
 import StartLiveModal from './StartLiveModal';
 import LiveViewerModal from './LiveViewerModal';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
-
-export default function LiveFeed() {
-  const { data: liveSessions = [], isLoading } = useGetActiveLiveSessions();
-  const [showStartLive, setShowStartLive] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<LiveSession | null>(null);
-
-  if (isLoading) {
-    return (
-      <div className="container max-w-4xl mx-auto py-8 px-4">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4">
-            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-            <p className="text-muted-foreground">Loading live sessions...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container max-w-4xl mx-auto py-8 px-4 pb-24">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-full">
-            <Radio className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Live Now</h1>
-            <p className="text-sm text-muted-foreground">
-              {liveSessions.length} {liveSessions.length === 1 ? 'person' : 'people'} streaming
-            </p>
-          </div>
-        </div>
-        <Button 
-          onClick={() => setShowStartLive(true)} 
-          className="gap-2 transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
-        >
-          <Radio className="h-4 w-4" />
-          Go Live
-        </Button>
-      </div>
-
-      {liveSessions.length === 0 ? (
-        <Card className="border-dashed transition-all hover:shadow-lg">
-          <CardContent className="flex flex-col items-center justify-center py-16 space-y-4">
-            <div className="p-4 bg-muted rounded-full">
-              <Radio className="h-12 w-12 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold">No Live Streams</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Be the first to go live and share your good deeds with the community!
-            </p>
-            <Button 
-              onClick={() => setShowStartLive(true)} 
-              className="gap-2 mt-2 transition-all hover:scale-105 active:scale-95"
-            >
-              <Radio className="h-4 w-4" />
-              Start Broadcasting
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {liveSessions.map((session) => (
-            <LiveSessionCard
-              key={session.id}
-              session={session}
-              onJoin={() => setSelectedSession(session)}
-            />
-          ))}
-        </div>
-      )}
-
-      {showStartLive && <StartLiveModal onClose={() => setShowStartLive(false)} />}
-      {selectedSession && (
-        <LiveViewerModal session={selectedSession} onClose={() => setSelectedSession(null)} />
-      )}
-    </div>
-  );
-}
 
 function LiveSessionCard({
   session,
   onJoin,
 }: {
   session: LiveSession;
-  onJoin: () => void;
+  onJoin: (session: LiveSession) => void;
 }) {
-  const { data: broadcasterProfile } = useGetUserProfile(session.broadcaster);
+  const broadcasterPrincipal = session.broadcaster?.toString() ?? null;
+  const { data: broadcasterProfile } = useGetUserProfile(broadcasterPrincipal);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const getAvatarUrl = () => {
+    if (broadcasterProfile?.profilePicture && broadcasterProfile.profilePicture.__kind__ === 'Some') {
+      try {
+        const blob = broadcasterProfile.profilePicture.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return undefined;
   };
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg cursor-pointer group" onClick={onJoin}>
-      <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-        <div className="absolute top-3 left-3 z-10">
-          <Badge className="bg-primary text-primary-foreground gap-1 animate-pulse px-3 py-1">
-            <div className="h-2 w-2 rounded-full bg-white" />
-            LIVE
-          </Badge>
+    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="h-32 bg-gradient-to-br from-red-500/20 to-primary/10 flex items-center justify-center relative">
+        <Radio className="w-12 h-12 text-primary/40" />
+        <Badge variant="destructive" className="absolute top-2 left-2 text-xs animate-pulse">
+          LIVE
+        </Badge>
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/50 rounded-full px-2 py-0.5">
+          <Users className="w-3 h-3 text-white" />
+          <span className="text-xs text-white">{Number(session.viewers)}</span>
         </div>
-        <div className="absolute top-3 right-3 z-10">
-          <Badge variant="secondary" className="gap-1 px-3 py-1">
-            <Eye className="h-3 w-3" />
-            {Number(session.viewers)}
-          </Badge>
-        </div>
-        <Radio className="h-16 w-16 text-primary/40 group-hover:scale-110 transition-transform" />
       </div>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-11 w-11 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
-            {broadcasterProfile?.profilePicture && (
-              <AvatarImage
-                src={broadcasterProfile.profilePicture.getDirectURL()}
-                alt={broadcasterProfile.name}
-              />
-            )}
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-              {broadcasterProfile ? getInitials(broadcasterProfile.name) : '?'}
+
+      <div className="p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={getAvatarUrl()} alt={broadcasterProfile?.name} />
+            <AvatarFallback className="text-xs">
+              {broadcasterProfile?.name?.[0]?.toUpperCase() ?? '?'}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-base truncate">
-              {broadcasterProfile?.name || 'Anonymous'}
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">Broadcasting now</p>
+          <div>
+            <p className="text-sm font-semibold text-foreground leading-none">
+              {broadcasterProfile?.name ?? 'Anonymous'}
+            </p>
+            <p className="text-xs text-muted-foreground">Live now</p>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <Button className="w-full gap-2 transition-all hover:scale-105 active:scale-95" variant="outline">
-          <Users className="h-4 w-4" />
+
+        <Button
+          size="sm"
+          className="w-full text-xs"
+          onClick={() => onJoin(session)}
+        >
+          <Play className="w-3 h-3 mr-1" />
           Join Stream
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
+  );
+}
+
+export default function LiveFeed() {
+  const { data: sessions = [], isLoading } = useGetLiveSessions();
+  const [showStartModal, setShowStartModal] = useState(false);
+  const [viewingSession, setViewingSession] = useState<LiveSession | null>(null);
+
+  const activeSessions = sessions.filter((s) => s.isActive);
+
+  return (
+    <div className="max-w-2xl mx-auto p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Radio className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-bold text-foreground">Live</h1>
+          {activeSessions.length > 0 && (
+            <Badge variant="destructive" className="text-xs animate-pulse">
+              {activeSessions.length} Live
+            </Badge>
+          )}
+        </div>
+        <Button size="sm" onClick={() => setShowStartModal(true)} className="text-xs">
+          Go Live
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-48 w-full rounded-xl" />
+          ))}
+        </div>
+      ) : activeSessions.length === 0 ? (
+        <div className="text-center py-16">
+          <Radio className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="font-medium text-foreground">No live streams right now</p>
+          <p className="text-sm text-muted-foreground mt-1">Be the first to go live!</p>
+          <Button className="mt-4" onClick={() => setShowStartModal(true)}>
+            Start Streaming
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {activeSessions.map((session) => (
+            <LiveSessionCard
+              key={session.id}
+              session={session}
+              onJoin={setViewingSession}
+            />
+          ))}
+        </div>
+      )}
+
+      {showStartModal && (
+        <StartLiveModal onClose={() => setShowStartModal(false)} />
+      )}
+      {viewingSession && (
+        <LiveViewerModal
+          session={viewingSession}
+          onClose={() => setViewingSession(null)}
+        />
+      )}
+    </div>
   );
 }

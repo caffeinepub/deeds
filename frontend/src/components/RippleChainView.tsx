@@ -1,143 +1,139 @@
-import { useState } from 'react';
-import { useGetRippleChain, useGetUserProfile, type Post } from '../hooks/useQueries';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
-import { Loader2, Zap, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from './ui/button';
+import React, { useState } from 'react';
+import { useGetRippleChain, useGetUserProfile } from '../hooks/useQueries';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { GitBranch, Plus } from 'lucide-react';
 import CreatePostModal from './CreatePostModal';
 
 interface RippleChainViewProps {
-  post: Post;
-  authorName?: string;
+  postId: string;
+  onClose?: () => void;
 }
 
-function RippleNode({ post, depth = 0 }: { post: Post; depth?: number }) {
-  const { data: authorProfile } = useGetUserProfile(post.author);
-  const { data: children, isLoading } = useGetRippleChain(post.id);
-  const [expanded, setExpanded] = useState(depth < 2);
-  const [showInspireModal, setShowInspireModal] = useState(false);
+function RipplePost({ post }: { post: any }) {
+  const authorPrincipal = post.author?.toString() ?? null;
+  const { data: authorProfile } = useGetUserProfile(authorPrincipal);
 
-  const getInitials = (name: string) =>
-    name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-  const formatTimestamp = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1000000);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+  const getAvatarUrl = () => {
+    if (authorProfile?.profilePicture && authorProfile.profilePicture.__kind__ === 'Some') {
+      try {
+        const blob = authorProfile.profilePicture.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return undefined;
   };
 
-  const hasChildren = children && children.length > 0;
+  const getPhotoUrl = (): string | null => {
+    if (post?.photo && post.photo.__kind__ === 'Some') {
+      try {
+        const blob = post.photo.value;
+        if (blob && typeof blob.getDirectURL === 'function') {
+          return blob.getDirectURL();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return null;
+  };
+
+  const photoUrl = getPhotoUrl();
+  const timestamp = new Date(Number(post.timestamp) / 1_000_000).toLocaleDateString();
 
   return (
-    <div className={`relative ${depth > 0 ? 'ml-6 pl-4 border-l-2 border-amber-200' : ''}`}>
-      <div
-        className="flex gap-3 p-3 rounded-xl bg-white border border-amber-100 shadow-sm hover:shadow-md transition-shadow mb-2"
-        style={{ animationDelay: `${depth * 100}ms` }}
-      >
-        <Avatar className="h-9 w-9 shrink-0">
-          {authorProfile?.profilePicture && (
-            <AvatarImage src={authorProfile.profilePicture.getDirectURL()} alt={authorProfile.name} />
-          )}
-          <AvatarFallback className="text-xs bg-amber-100 text-amber-700">
-            {authorProfile ? getInitials(authorProfile.name) : '?'}
+    <div className="flex gap-3 py-3 border-b border-border last:border-0">
+      <div className="flex flex-col items-center">
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={getAvatarUrl()} alt={authorProfile?.name} />
+          <AvatarFallback className="text-xs">
+            {authorProfile?.name?.[0]?.toUpperCase() ?? '?'}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm">{authorProfile?.name || 'Anonymous'}</span>
-            <span className="text-xs text-muted-foreground">{formatTimestamp(post.timestamp)}</span>
-            {depth === 0 && <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">Origin</Badge>}
-          </div>
-          <p className="text-sm mt-1 line-clamp-3">{post.caption}</p>
-          {post.photo && (
-            <img
-              src={post.photo.getDirectURL()}
-              alt="Post"
-              className="mt-2 rounded-lg w-full max-h-32 object-cover"
-            />
-          )}
-          <button
-            onClick={() => setShowInspireModal(true)}
-            className="mt-2 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1 transition-colors"
-          >
-            <Zap className="h-3 w-3" />
-            This inspired me ✨
-          </button>
-        </div>
+        <div className="w-0.5 bg-border flex-1 mt-1" />
       </div>
-
-      {hasChildren && (
-        <div>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 font-medium mb-2 ml-2 transition-colors"
-          >
-            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            {children.length} inspired deed{children.length !== 1 ? 's' : ''}
-          </button>
-          {expanded && (
-            <div>
-              {children.map(child => (
-                <RippleNode key={child.id} post={child} depth={depth + 1} />
-              ))}
-            </div>
-          )}
+      <div className="flex-1 min-w-0 pb-2">
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="text-sm font-semibold text-foreground">
+            {authorProfile?.name ?? 'Anonymous'}
+          </span>
+          <span className="text-xs text-muted-foreground">{timestamp}</span>
         </div>
-      )}
-
-      {isLoading && depth > 0 && (
-        <div className="ml-6 pl-4">
-          <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
-        </div>
-      )}
-
-      {showInspireModal && (
-        <CreatePostModal
-          onClose={() => setShowInspireModal(false)}
-          parentPostId={post.id}
-          parentCaption={post.caption}
-          parentAuthorName={authorProfile?.name}
-        />
-      )}
+        <p className="text-sm text-foreground">{post.caption}</p>
+        {photoUrl && (
+          <img
+            src={photoUrl}
+            alt="Post"
+            className="mt-2 rounded-lg max-h-32 object-cover"
+            loading="lazy"
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-export default function RippleChainView({ post, authorName }: RippleChainViewProps) {
-  const { data: children, isLoading } = useGetRippleChain(post.id);
+export default function RippleChainView({ postId, onClose }: RippleChainViewProps) {
+  const { data: chain = [], isLoading } = useGetRippleChain(postId);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 mb-3">
-        <img
-          src="/assets/generated/ripple-effect-hero.dim_800x400.png"
-          alt="Ripple Effect"
-          className="h-8 w-auto rounded object-cover"
-          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-        />
-        <div>
-          <h3 className="font-bold text-sm text-amber-700">Ripple Chain</h3>
-          <p className="text-xs text-muted-foreground">
-            {isLoading ? 'Loading...' : `${(children?.length || 0)} inspired deed${(children?.length || 0) !== 1 ? 's' : ''}`}
-          </p>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-3 border-b border-border">
+        <div className="flex items-center gap-2">
+          <GitBranch className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground text-sm">Ripple Chain</h3>
+          <span className="text-xs text-muted-foreground">({chain.length} deeds)</span>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-xs h-7"
+          onClick={() => setShowCreateModal(true)}
+        >
+          <Plus className="w-3 h-3 mr-1" />
+          Add Ripple
+        </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-4">
-          <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
-        </div>
-      ) : (
-        <RippleNode post={post} depth={0} />
-      )}
+      <ScrollArea className="flex-1 px-3">
+        {isLoading ? (
+          <div className="space-y-3 py-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-3">
+                <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : chain.length === 0 ? (
+          <div className="text-center py-8">
+            <GitBranch className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No ripples yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Be the first to continue this deed!</p>
+          </div>
+        ) : (
+          <div className="py-2">
+            {chain.map((post: any) => (
+              <RipplePost key={post.id} post={post} />
+            ))}
+          </div>
+        )}
+      </ScrollArea>
+
+      <CreatePostModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+      />
     </div>
   );
 }

@@ -1,57 +1,64 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Deeds platform focused on kindness and community for all ages. User is building 5 major new features: Ripple Effect Stories, Love Notes to Strangers, Deed of the Day Challenges, Kindness Matches, and Memory Jars.",
-  "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Warm glowing mason jar illustration with golden light and small floating hearts, for Memory Jar feature (memory-jar-icon.dim_256x256.png)\n- Sealed wax-stamped envelope with a small heart, soft warm tones, for Love Notes feature (love-note-envelope.dim_256x256.png)\n- Ripple of golden rings on a calm water surface symbolising chain of kindness, for Ripple Effect Stories (ripple-effect-hero.dim_800x400.png)\n- Two hands reaching toward each other with soft pastel glow, for Kindness Matches feature (kindness-match-hero.dim_800x400.png)\n- Sun rising over a community of silhouettes holding hands, warm coral and gold tones, for Deed of the Day (deed-of-the-day-hero.dim_800x400.png)",
+  "summary": "A social media app called 'Deeds' focused on acts of kindness. Users can perform and share deeds, receive kindness matches, and interact with others. Key features include Memory Jars (personal scrapbook of saved deeds), Profile Report Card (AI-generated weekly peer review with user-chosen grading scale), Deeds Bar (19-hour daily tracker with floating icons and light baby blue lightning background, shown only on profile page), a lock screen overlay when daily limit is reached, profile picture and status options, and AI-generated deed categories.",
+  "architectural_notes": [
+    "App is called 'Deeds' — a social media platform focused on acts of kindness and human connection.",
+    "Deeds Bar (19-hour tracker) is shown only on the user's own profile page, not globally."
+  ],
+  "known_issues": [
+    "Memory Jars feature not appearing in current build",
+    "Profile page showing nothing when clicked",
+    "Deed categories not loading on the Deeds page"
+  ],
+  "isFixRequest": true,
+  "imageRequirements": "## Required Images\n- Cartoon bear head icon with friendly expression on transparent background (bear-icon.dim_128x128.png)\n- Cartoon pineapple character head icon on transparent background (pineapple-icon.dim_128x128.png)\n- Cartoon monkey head icon with playful expression on transparent background (monkey-icon.dim_128x128.png)\n- Light baby blue abstract lightning bolt pattern background tile (lightning-bg.dim_800x400.png)",
   "existing_features": [
     {
-      "id": "feature-build-a-ripple-effect-stories-ui-on-each-postcard-show-a-this-inspired-me-button-that-opens-a-ripple-post-creation-modal-pre-linked-to-the-parent-deed-display-the-ripple-chain-as-a-visual-tree-timeline-beneath-the-original-post-showing-how-kindness-spread-from-one-deed-to-many",
-      "title": "Build a Ripple Effect Stories UI: on each PostCard, show a 'This inspired me' button that opens a ripple post creation modal pre-linked to the parent deed. Display the ripple chain as a visual tree/timeline beneath the original post, showing how kindness spread from one deed to many.",
+      "id": "feature-fix-the-memory-jars-feature-so-it-appears-and-functions-correctly-users-can-save-deeds-from-others-into-a-personal-scrapbook-toggle-public-private-visibility-and-the-original-poster-is-notified-when-their-deed-is-saved",
+      "title": "Fix the Memory Jars feature so it appears and functions correctly: users can save deeds from others into a personal scrapbook, toggle public/private visibility, and the original poster is notified when their deed is saved.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-profile-page-so-it-loads-and-displays-correctly-show-the-user-s-avatar-posts-albums-follower-following-counts-notifications-memory-jar-profile-picture-upload-option-and-status-update-option",
+      "title": "Fix the Profile page so it loads and displays correctly: show the user's avatar, posts, albums, follower/following counts, notifications, memory jar, profile picture upload option, and status update option.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-a-love-notes-to-strangers-page-accessible-from-the-main-navigation-show-a-warm-romantic-card-ui-where-authenticated-users-can-type-and-send-an-anonymous-note-display-received-notes-in-a-scrollable-inbox-styled-like-sealed-letter-envelopes-that-open-on-click-revealing-the-message-with-a-soft-animation",
-      "title": "Build a Love Notes to Strangers page accessible from the main navigation: show a warm, romantic card UI where authenticated users can type and send an anonymous note. Display received notes in a scrollable inbox styled like sealed letter envelopes that open on click, revealing the message with a soft animation.",
+      "id": "feature-fix-deed-categories-on-the-deeds-feed-page-implement-ai-style-random-category-assignment-so-that-when-a-user-creates-a-post-category-options-are-dynamically-generated-and-displayed-for-selection-rather-than-failing-to-load",
+      "title": "Fix deed categories on the Deeds/feed page: implement AI-style random category assignment so that when a user creates a post, category options are dynamically generated and displayed for selection rather than failing to load.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-profile-report-card-feature-a-weekly-summary-card-on-the-user-s-profile-that-reflects-their-own-activity-stats-posts-made-deeds-completed-likes-received-etc-with-a-user-selectable-grading-scale-letter-grade-a-f-star-rating-1-5-or-percentage-0-100-the-report-card-has-a-public-private-toggle",
+      "title": "Implement the Profile Report Card feature: a weekly summary card on the user's profile that reflects their own activity stats (posts made, deeds completed, likes received, etc.) with a user-selectable grading scale (letter grade A-F, star rating 1-5, or percentage 0-100%). The report card has a public/private toggle.",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-a-deed-of-the-day-challenge-page-display-today-s-challenge-prompt-in-a-large-celebratory-hero-card-with-a-countdown-to-the-next-day-s-challenge-show-a-accept-complete-button-that-opens-the-post-creation-modal-pre-filled-with-the-challenge-context-below-the-hero-render-a-live-community-wall-of-everyone-who-has-completed-today-s-challenge-with-their-deed-posts-participant-count-and-a-progress-ring",
-      "title": "Build a Deed of the Day Challenge page: display today's challenge prompt in a large, celebratory hero card with a countdown to the next day's challenge. Show a 'Accept & Complete' button that opens the post creation modal pre-filled with the challenge context. Below the hero, render a live community wall of everyone who has completed today's challenge with their deed posts, participant count, and a progress ring.",
+      "id": "feature-implement-the-deeds-bar-on-the-profile-page-a-19-hour-daily-activity-tracker-displayed-only-on-the-profile-page-showing-floating-bear-pineapple-and-monkey-head-icons-against-a-light-baby-blue-lightning-bolt-background-tracking-daily-app-usage-progress",
+      "title": "Implement the Deeds Bar on the profile page: a 19-hour daily activity tracker displayed only on the profile page, showing floating bear, pineapple, and monkey head icons against a light baby blue lightning-bolt background, tracking daily app usage progress.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-lock-screen-overlay-that-appears-on-every-page-when-the-user-reaches-the-19-hour-daily-usage-limit-the-overlay-displays-a-message-about-the-daily-limit-and-requires-the-user-to-click-any-bold-letter-in-the-terms-acceptance-text-to-dismiss-and-continue",
+      "title": "Implement a lock screen overlay that appears on every page when the user reaches the 19-hour daily usage limit. The overlay displays a message about the daily limit and requires the user to click any bold letter in the terms/acceptance text to dismiss and continue.",
       "reqIds": [
         "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-a-kindness-matches-page-display-the-current-user-s-top-5-matched-users-as-profile-cards-with-a-compatibility-percentage-shared-deed-categories-and-the-reason-they-were-matched-include-a-say-hello-button-on-each-card-that-initiates-a-message-to-that-user-style-the-page-with-a-warm-heart-themed-romantic-aesthetic",
-      "title": "Build a Kindness Matches page: display the current user's top 5 matched users as profile cards with a compatibility percentage, shared deed categories, and the reason they were matched. Include a 'Say Hello 👋' button on each card that initiates a message to that user. Style the page with a warm, heart-themed romantic aesthetic.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-a-memory-jar-ui-add-a-mason-jar-bookmark-icon-to-every-postcard-that-fills-animates-when-a-post-is-saved-create-a-dedicated-memory-jar-profile-section-accessible-from-the-profile-page-displaying-all-saved-posts-in-a-cozy-scrapbook-grid-layout-with-a-vintage-paper-warmth-aesthetic-show-a-count-badge-on-the-jar-icon-in-the-profile-nav",
-      "title": "Build a Memory Jar UI: add a mason-jar bookmark icon to every PostCard that fills/animates when a post is saved. Create a dedicated Memory Jar profile section (accessible from the Profile page) displaying all saved posts in a cozy scrapbook grid layout with a vintage paper/warmth aesthetic. Show a count badge on the jar icon in the profile nav.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-main-navigation-header-component-to-include-links-to-all-five-new-features-love-notes-deed-of-the-day-kindness-matches-and-memory-jar-memory-jar-also-accessible-from-profile-ensure-all-new-pages-are-registered-as-routes-in-app-tsx",
-      "title": "Update the main navigation (Header component) to include links to all five new features: Love Notes, Deed of the Day, Kindness Matches, and Memory Jar (Memory Jar also accessible from Profile). Ensure all new pages are registered as routes in App.tsx.",
-      "reqIds": [
-        "REQ-11"
       ],
       "version": 1
     }
@@ -59,72 +66,38 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Ripple Effect Stories: chain of kindness linking inspired deeds back to originating deed",
+      "summary": "Memory Jars: personal scrapbook of saved deeds from others, public/private setting, notify original poster when deed is saved",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Love Notes to Strangers: anonymous positivity board for sending uplifting messages to random users",
+      "summary": "Profile Report Card: AI-generated weekly options for peer review, reflects own activity stats, user chooses letter/star/percentage grading, public/private setting",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Deed of the Day Challenges: daily community-wide kindness prompt to create shared moments",
+      "summary": "Deeds Bar on profile page: 19-hour daily tracker, floating bear/pineapple/monkey head icons, light baby blue lightning background",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Kindness Matches: algorithm pairing users with similar deeds as a friendship matchmaker",
+      "summary": "Lock screen overlay when 19-hour daily limit is reached, shown on every page; user can click any bold letter to accept terms and continue",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Memory Jars: personal scrapbook of favorite deeds collected from others for revisiting",
+      "summary": "Profile page: profile picture upload and status option",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Add backend support for Ripple Effect Stories: allow a post to optionally reference a parent post ID as its 'inspiration source', store a ripple chain map (parentPostId → [childPostIds]), and expose query functions to fetch the full ripple chain for any given post.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Add backend support for Love Notes to Strangers: store anonymous positivity notes with a message body (max 280 chars), a timestamp, and a recipient principal chosen randomly from active users. Expose functions to send a note and fetch notes addressed to the calling user.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add backend support for Deed of the Day Challenges: store a single daily challenge prompt (text, date, category) set by admins or auto-rotated from a curated list. Store user challenge completions linking a user principal, date, and their completion post ID. Expose query functions to get today's challenge and all completions for it.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Add backend support for Kindness Matches: compute compatibility scores between users based on overlapping deed categories in their posts. Store match pairs with a score and a 'reason' text (e.g., 'You both love helping neighbours'). Expose a query for a user to retrieve their top 5 Kindness Matches.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Add backend support for Memory Jars: allow users to save any post into their personal Memory Jar collection, store saved post references (postId, savedAt timestamp) per user, and expose query functions to add/remove a post from a jar and to fetch all jar contents for the calling user.",
-      "reqIds": [
-        "REQ-9"
-      ],
+      "summary": "AI-generated deed categories: built-in AI randomly decides category options on the Deeds page",
+      "reqIds": [],
       "status": "pending"
     }
   ],

@@ -1,15 +1,17 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { InternetIdentityProvider } from './hooks/useInternetIdentity';
-import { LanguageProvider } from './contexts/LanguageContext';
-import { Toaster } from './components/ui/sonner';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { hasRecoveryBeenAttempted, markRecoveryAttempted, isInRecoveryCooldown } from './utils/swRecovery';
+import { Toaster } from '@/components/ui/sonner';
+import { useInternetIdentity } from './hooks/useInternetIdentity';
+import { useGetCallerUserProfile } from './hooks/useQueries';
 
+// Static imports — avoids TypeScript "not a module" errors from dynamic import()
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Gate from './components/Gate';
+import LoginPrompt from './components/LoginPrompt';
+import ProfileSetupModal from './components/ProfileSetupModal';
+import LockScreenOverlay from './components/LockScreenOverlay';
 import Feed from './components/Feed';
 import DiscoverFeed from './components/DiscoverFeed';
 import Profile from './components/Profile';
@@ -20,44 +22,75 @@ import Marketplace from './components/Marketplace';
 import Space from './components/Space';
 import AdminDashboard from './components/AdminDashboard';
 import ServiceStatusChecker from './components/ServiceStatusChecker';
-import StartupRecoveryScreen from './components/StartupRecoveryScreen';
-import TopLevelErrorBoundary from './components/TopLevelErrorBoundary';
-import UpdateAvailableBanner from './components/UpdateAvailableBanner';
-import LoveNotes from './components/LoveNotes';
-import DeedOfTheDay from './components/DeedOfTheDay';
-import KindnessMatches from './components/KindnessMatches';
-import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
+import Gate from './components/Gate';
+import AllInOneHub from './components/AllInOneHub';
+import ReelHome from './components/ReelHome';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2,
       retry: 1,
     },
   },
 });
 
-function Layout() {
+function AppLayout() {
+  const { identity, isInitializing } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    isFetched: profileFetched,
+  } = useGetCallerUserProfile();
+
+  const showProfileSetup =
+    isAuthenticated && !profileLoading && profileFetched && userProfile === null;
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-3">
+          <img
+            src="/assets/generated/deeds-header-logo-star-flash-enhanced.dim_300x100.png"
+            alt="Deeds"
+            className="h-12 mx-auto"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading Deeds...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPrompt />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'oklch(100% 0 0)', color: 'oklch(20% 0 0)' }}>
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 pt-16 pb-4">
         <Outlet />
       </main>
       <Footer />
+      {showProfileSetup && <ProfileSetupModal open={true} onComplete={() => {}} />}
+      <LockScreenOverlay />
     </div>
   );
 }
 
-const rootRoute = createRootRoute({
-  component: Layout,
-});
+// Routes
+const rootRoute = createRootRoute({ component: AppLayout });
 
-const indexRoute = createRoute({
+const reelRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: Gate,
+  component: ReelHome,
 });
 
 const gateRoute = createRoute({
@@ -88,6 +121,12 @@ const messagesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/messages',
   component: Messages,
+});
+
+const hubRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/hub',
+  component: AllInOneHub,
 });
 
 const liveRoute = createRoute({
@@ -129,28 +168,39 @@ const serviceStatusRoute = createRoute({
 const loveNotesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/love-notes',
-  component: LoveNotes,
+  component: AllInOneHub,
 });
 
 const deedOfTheDayRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/deed-of-the-day',
-  component: DeedOfTheDay,
+  component: () => (
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-foreground mb-4">Deed of the Day</h1>
+      <p className="text-muted-foreground">Today's featured deed challenge coming soon!</p>
+    </div>
+  ),
 });
 
 const kindnessMatchesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/kindness-matches',
-  component: KindnessMatches,
+  component: () => (
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-foreground mb-4">Kindness Matches</h1>
+      <p className="text-muted-foreground">Your kindness matches are being calculated...</p>
+    </div>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([
-  indexRoute,
+  reelRoute,
   gateRoute,
   feedRoute,
   discoverRoute,
   profileRoute,
   messagesRoute,
+  hubRoute,
   liveRoute,
   blogRoute,
   marketplaceRoute,
@@ -170,74 +220,13 @@ declare module '@tanstack/react-router' {
   }
 }
 
-function AppContent() {
-  const { updateAvailable, isStale, reloadBlocked, activateUpdate } = useServiceWorkerUpdate();
-  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
-
-  useEffect(() => {
-    if (updateAvailable || isStale || reloadBlocked) {
-      setShowUpdateBanner(true);
-    }
-  }, [updateAvailable, isStale, reloadBlocked]);
-
-  if (reloadBlocked) {
-    return <StartupRecoveryScreen context="update-failed" />;
-  }
-
-  return (
-    <>
-      <RouterProvider router={router} />
-      <Toaster />
-      {showUpdateBanner && (
-        <UpdateAvailableBanner
-          onUpdate={activateUpdate}
-          onDismiss={() => setShowUpdateBanner(false)}
-          reloadBlocked={reloadBlocked}
-        />
-      )}
-    </>
-  );
-}
-
-function AppWithWatchdog() {
-  const [isStuck, setIsStuck] = useState(false);
-
-  useEffect(() => {
-    if (isInRecoveryCooldown()) {
-      return;
-    }
-
-    if (hasRecoveryBeenAttempted()) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setIsStuck(true);
-      markRecoveryAttempted();
-    }, 15000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isStuck) {
-    return <StartupRecoveryScreen context="stuck" />;
-  }
-
-  return <AppContent />;
-}
-
 export default function App() {
   return (
-    <TopLevelErrorBoundary>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-        <QueryClientProvider client={queryClient}>
-          <InternetIdentityProvider>
-            <LanguageProvider>
-              <AppWithWatchdog />
-            </LanguageProvider>
-          </InternetIdentityProvider>
-        </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <RouterProvider router={router} />
+        <Toaster position="top-center" richColors />
       </ThemeProvider>
-    </TopLevelErrorBoundary>
+    </QueryClientProvider>
   );
 }
